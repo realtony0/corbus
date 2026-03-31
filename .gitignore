@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+.next_corrupt*/
+out/
+
+# misc
+.DS_Store
+*.pem
+
+# source images at root
+IMG_*.jpeg
+785E*.png
+logoo.jpg
+tshirt.jpg
+
+# claude
+.claude/
+
+# debug
+npm-debug.log*
+
+# env
+.env*.local
+
+# vercel
+.vercel
+
+# cache
+*.tsbuildinfo

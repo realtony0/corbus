@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Corbus Gothic";
+  src: url("/fonts/gothic.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --color-bg: #000000;
+  --color-text: #ffffff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Inter", "Helvetica Neue", sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3 {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+::selection {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 2px;
+}
+
+.font-gothic {
+  font-family: "UnifrakturCook", "Old English Text MT", "UnifrakturMaguntia", "Corbus Gothic", serif;
+  font-weight: 700;
+}
+
+/* Smooth fade-in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 1s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.8s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Staggered children animation */
+.stagger-children > * {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
+
+/* Loading screen */
+@keyframes logoReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+    filter: blur(10px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+    filter: blur(5px);
+  }
+}
+
+/* Smooth section transitions */
+.section-gradient-top {
+  position: relative;
+}
+
+.section-gradient-top::before {
+  content: "";
+  position: absolute;
+  top: -80px;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, transparent, black);
+  pointer-events: none;
+  z-index: 5;
+}
