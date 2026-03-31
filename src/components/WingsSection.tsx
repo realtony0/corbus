@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import Image from "next/image";
 import { useSiteSettings } from "@/lib/useSiteSettings";
 
 export default function WingsSection() {
@@ -53,9 +54,11 @@ export default function WingsSection() {
           willChange: "transform, opacity",
         }}
       >
-        <img
+        <Image
           src="/images/logos/wings.jpg"
           alt=""
+          width={1200}
+          height={600}
           className="w-full max-w-6xl h-auto object-contain"
           style={{ filter: "invert(1) brightness(3) contrast(0.5)" }}
         />
@@ -99,9 +102,11 @@ export default function WingsSection() {
           </p>
 
           <div className="w-32 h-32 md:w-44 md:h-44 flex-shrink-0">
-            <img
+            <Image
               src="/images/logos/crows.jpg"
               alt="Corbus crows"
+              width={176}
+              height={176}
               className="w-full h-full object-contain"
               style={{ filter: "invert(1) brightness(2) contrast(0.6)", opacity: 0.4 }}
             />

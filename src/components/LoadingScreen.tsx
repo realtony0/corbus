@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useSiteSettings } from "@/lib/useSiteSettings";
 
 export default function LoadingScreen() {
@@ -27,9 +28,12 @@ export default function LoadingScreen() {
       }`}
     >
       {/* Logo image */}
-      <img
+      <Image
         src="/images/logos/corbus-logo.png"
         alt="Corbus"
+        width={240}
+        height={80}
+        priority
         className="select-none"
         style={{
           height: "80px",

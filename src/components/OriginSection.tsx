@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import Image from "next/image";
 import { useSiteSettings } from "@/lib/useSiteSettings";
 
 export default function OriginSection() {
@@ -84,9 +85,11 @@ export default function OriginSection() {
         >
           {/* Logo side */}
           <div className="flex-shrink-0">
-            <img
+            <Image
               src="/images/logos/corbus-icon-transparent.png"
               alt="Corbus icon"
+              width={144}
+              height={144}
               className="w-24 h-24 md:w-36 md:h-36 object-contain"
               style={{ opacity: 0.6 }}
             />

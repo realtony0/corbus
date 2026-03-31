@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import { useSiteSettings } from "@/lib/useSiteSettings";
 
 export default function HeroSection() {
@@ -68,9 +69,12 @@ export default function HeroSection() {
         />
 
         {/* Logo image */}
-        <img
+        <Image
           src="/images/logos/corbus-logo.png"
           alt="Corbus"
+          width={300}
+          height={100}
+          priority
           className={`select-none transition-all duration-1000 ${
             loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   getCart,
@@ -83,9 +84,11 @@ export default function CartPage() {
                   key={`${item.product.id}-${item.size}`}
                   className="flex gap-4 border-b border-white/5 pb-6"
                 >
-                  <img
+                  <Image
                     src={item.product.images[0]}
                     alt={item.product.name}
+                    width={80}
+                    height={80}
                     className="w-20 h-20 object-cover bg-neutral-900"
                   />
                   <div className="flex-1">

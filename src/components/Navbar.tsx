@@ -124,9 +124,11 @@ export default function Navbar() {
       >
         {/* Dimmed logo in background */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <img
+          <Image
             src="/images/logos/corbus-icon.jpeg"
             alt=""
+            width={256}
+            height={320}
             className="w-64 h-80 object-contain opacity-[0.04]"
             style={{ filter: "invert(1)" }}
           />

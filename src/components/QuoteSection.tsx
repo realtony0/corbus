@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import Image from "next/image";
 import FlyingBirds from "./FlyingBirds";
 import { useSiteSettings } from "@/lib/useSiteSettings";
 
@@ -44,9 +45,11 @@ export default function QuoteSection() {
         className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden"
         style={{ opacity: 0.05 }}
       >
-        <img
+        <Image
           src="/images/logos/wings.jpg"
           alt=""
+          width={1200}
+          height={600}
           className="w-full max-w-6xl h-auto object-contain"
           style={{ filter: "invert(1) brightness(3) contrast(0.5)" }}
         />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import FooterSection from "@/components/FooterSection";
 
 const galleryImages = [
@@ -39,11 +40,13 @@ function GalleryImage({
         transition: "opacity 0.8s ease-out, transform 0.8s ease-out",
       }}
     >
-      <img
+      <Image
         src={src}
         alt={alt}
+        width={800}
+        height={1000}
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
-        loading="lazy"
       />
 
       {/* Hover overlay */}
@@ -145,9 +148,12 @@ export default function GalleryPage() {
             </svg>
           </button>
 
-          <img
+          <Image
             src={galleryImages[lightbox].src}
             alt={galleryImages[lightbox].alt}
+            width={1200}
+            height={1500}
+            sizes="100vw"
             className="max-w-full max-h-[85vh] object-contain"
             onClick={(e) => e.stopPropagation()}
           />
