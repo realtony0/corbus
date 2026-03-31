@@ -30,14 +30,21 @@ export default function HeroSection() {
       <div
         className="absolute inset-0 transition-opacity duration-1000"
         style={{
-          backgroundImage: `url('${settings.heroImage}')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center 35%",
           transform: `translateY(${parallax}px) scale(1.1)`,
           opacity: loaded ? opacity * 0.7 : 0,
           willChange: "transform",
         }}
-      />
+      >
+        <Image
+          src={settings.heroImage}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+          style={{ objectPosition: "center 35%" }}
+        />
+      </div>
 
       {/* Gradient overlay for smooth transition to next section */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black" />
