@@ -7,8 +7,8 @@ let products: Product[] = [
     name: "CORBUS A ERA — White",
     description:
       "Catch Our Rebel Brand Unique Shit. T-shirt blanc avec le logo Corbus sur le devant et le design A ERA au dos.",
-    price: 20000,
-    currency: "XOF",
+    price: 30,
+    currency: "EUR",
     images: ["/images/products/a-era-white.jpg"],
     sizes: ["S", "M", "L", "XL"],
     category: "T-shirts",
@@ -20,8 +20,8 @@ let products: Product[] = [
     name: "CORBUS A ERA — Black",
     description:
       "Catch Our Rebel Brand Unique Shit. T-shirt noir avec le logo Corbus sur le devant et le design A ERA au dos.",
-    price: 20000,
-    currency: "XOF",
+    price: 30,
+    currency: "EUR",
     images: ["/images/products/a-era-black.jpg"],
     sizes: ["S", "M", "L", "XL"],
     category: "T-shirts",
@@ -33,8 +33,8 @@ let products: Product[] = [
     name: "CORBUS Embrace — White",
     description:
       '"Embrace the Corbus land, they hold the truth." T-shirt blanc avec le logo Corbus gothique et le design Embrace au dos.',
-    price: 20000,
-    currency: "XOF",
+    price: 30,
+    currency: "EUR",
     images: ["/images/products/embrace-white.jpg"],
     sizes: ["S", "M", "L", "XL"],
     category: "T-shirts",

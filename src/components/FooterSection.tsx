@@ -17,7 +17,7 @@ export default function FooterSection() {
 
         {/* Logo */}
         <h2 className="font-gothic text-5xl md:text-6xl text-center">
-          Corbus
+          Am Web Agency
         </h2>
 
         {/* Tagline */}
@@ -87,7 +87,7 @@ export default function FooterSection() {
         />
 
         <p className="text-white/10 text-[10px] tracking-wider text-center">
-          &copy; 2026 CORBUS. All rights reserved.
+          &copy; 2026 Am Web Agency. Tous droits réservés.
         </p>
       </div>
     </footer>

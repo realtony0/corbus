@@ -41,7 +41,7 @@ export default function ProductCard({ product }: { product: Product }) {
         {product.name}
       </h3>
       <p className="text-white/40 text-sm mb-3">
-        {product.price.toLocaleString()} FCFA
+        {product.price.toLocaleString()} €
       </p>
 
       {/* Sizes */}

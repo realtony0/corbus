@@ -91,13 +91,13 @@ export function generateOrderMessage(customerInfo: {
   const items = cart
     .map(
       (item) =>
-        `• ${item.product.name} (${item.size}) x${item.quantity} — ${item.product.price.toLocaleString()} FCFA`
+        `• ${item.product.name} (${item.size}) x${item.quantity} — ${item.product.price.toLocaleString()} €`
     )
     .join("\n");
 
   const total = getCartTotal().toLocaleString();
 
-  let msg = `🛒 Nouvelle commande CORBUS\n\n`;
+  let msg = `🛒 Nouvelle commande Am Web Agency\n\n`;
   msg += `👤 ${customerInfo.name}\n`;
   msg += `📞 ${customerInfo.phone}\n`;
   msg += `🌍 ${customerInfo.country}\n`;
@@ -105,7 +105,7 @@ export function generateOrderMessage(customerInfo: {
     msg += `📍 ${customerInfo.address}, ${customerInfo.city}\n`;
   }
   msg += `\n📦 Articles:\n${items}\n\n`;
-  msg += `💰 Total: ${total} FCFA`;
+  msg += `💰 Total: ${total} €`;
 
   return msg;
 }

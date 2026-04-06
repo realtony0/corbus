@@ -95,7 +95,7 @@ export default function CartPage() {
                     <h3 className="text-sm font-medium">{item.product.name}</h3>
                     <p className="text-white/40 text-xs mt-1">Size: {item.size}</p>
                     <p className="text-white/40 text-xs">
-                      {item.product.price.toLocaleString()} FCFA
+                      {item.product.price.toLocaleString()} €
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
@@ -133,7 +133,7 @@ export default function CartPage() {
             <div className="border-t border-white/10 pt-6 mb-8">
               <div className="flex justify-between items-center">
                 <span className="text-white/60 text-sm tracking-wider uppercase">Total</span>
-                <span className="text-xl font-medium">{total.toLocaleString()} FCFA</span>
+                <span className="text-xl font-medium">{total.toLocaleString()} €</span>
               </div>
             </div>
 
@@ -224,13 +224,13 @@ export default function CartPage() {
                     {item.product.name} ({item.size}) x{item.quantity}
                   </span>
                   <span>
-                    {(item.product.price * item.quantity).toLocaleString()} FCFA
+                    {(item.product.price * item.quantity).toLocaleString()} €
                   </span>
                 </div>
               ))}
               <div className="border-t border-white/10 mt-4 pt-4 flex justify-between">
                 <span className="text-sm tracking-wider uppercase">Total</span>
-                <span className="font-medium">{total.toLocaleString()} FCFA</span>
+                <span className="font-medium">{total.toLocaleString()} €</span>
               </div>
             </div>
 

@@ -94,7 +94,7 @@ function ProductCard({ product, delay }: { product: Product; delay: number }) {
         {product.name}
       </h3>
       <p className="text-[13px] text-white/35 font-light tracking-wider">
-        {product.price.toLocaleString()} FCFA
+        {product.price.toLocaleString()} €
       </p>
     </div>
   );

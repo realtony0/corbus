@@ -29,12 +29,12 @@ export interface SiteSettings {
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   whatsapp: "221788292047",
-  instagram: "@corbus.sn",
-  email: "corbus.sn@gmail.com",
-  tagline: "For all the black birds",
+  instagram: "@amwebagency",
+  email: "contact@amwebagency.com",
+  tagline: "Votre agence web créative",
   heroImage: "/images/gallery/photo4.jpg",
   heroLogoVisible: true,
-  welcomeTitle: "Welcome to the Corbusland",
+  welcomeTitle: "Bienvenue chez Am Web Agency",
   welcomeSubtitle: "",
   welcomeDescription: "",
   quoteText: "Fashion with Spirit, Style with Meaning",

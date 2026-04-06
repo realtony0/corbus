@@ -3,10 +3,10 @@ import "./globals.css";
 import LayoutWrapper from "@/components/LayoutWrapper";
 
 export const metadata: Metadata = {
-  title: "CORBUS — For All The Black Birds",
+  title: "Am Web Agency",
   description:
-    "Fashion with Spirit, Style with Meaning. Inspired by the crow, a symbol of mystery, intelligence and freedom.",
-  keywords: ["Corbus", "streetwear", "fashion", "crow", "raven", "Senegal"],
+    "Am Web Agency — Votre agence web créative. Sites web, applications et e-commerce.",
+  keywords: ["Am web agency", "agence web", "création site web", "e-commerce"],
 };
 
 export default function RootLayout({
