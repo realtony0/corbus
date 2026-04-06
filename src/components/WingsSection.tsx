@@ -87,48 +87,47 @@ export default function WingsSection() {
           </p>
         </div>
 
-        {/* Text + crow image side by side */}
+        {/* Text section */}
         <div
-          className={`flex flex-col md:flex-row items-center gap-8 md:gap-12 transition-all duration-[1.2s] ease-out ${
+          className={`transition-all duration-[1.2s] ease-out ${
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
           style={{ transitionDelay: "0.3s", marginBottom: "60px" }}
         >
-          <p className="flex-1 text-white/70 text-sm md:text-[15px] leading-[2] text-center md:text-left">
+          <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center" style={{ marginBottom: "24px" }}>
             The Corbus Collection represents the revolt of man&apos;s soul in a
-            corrupted, cruel, and fake society we&apos;re all living in. Inspired
-            by the crow, a symbol of mystery, intelligence and freedom, Corbus
-            invites you to express your unique and rebellious personality.
+            corrupted, cruel, and fake society we&apos;re all living in.
           </p>
-
-          <div className="w-32 h-32 md:w-44 md:h-44 flex-shrink-0">
-            <Image
-              src="/images/logos/crows.jpg"
-              alt="Corbus crows"
-              width={176}
-              height={176}
-              className="w-full h-full object-contain"
-              style={{ filter: "invert(1) brightness(2) contrast(0.6)", opacity: 0.4 }}
-            />
-          </div>
+          <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center" style={{ marginBottom: "24px" }}>
+            Inspired by the crow, a symbol of mystery, intelligence and freedom,
+            Corbus invites you to express your unique and rebellious personality.
+          </p>
+          <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center">
+            The surname Corbus is a name for a person who is raven-haired or
+            dark-complexioned. The surname Corvi is derived from the Italian
+            word &laquo;&nbsp;corvo&nbsp;&raquo; which comes from the Latin
+            &laquo;&nbsp;corvus&nbsp;&raquo; which means raven or crow.
+            Furthermore, this nickname surname was often used to describe
+            priests 👁️
+          </p>
         </div>
 
         {/* Three birds grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             {
-              title: "RAVEN",
-              text: settings.ravenDescription || "Seen as a messenger between worlds, the raven is associated with transformation, mystery, and prophecy. It is a symbol of death and rebirth.",
+              title: "RAVEN 🐦‍⬛",
+              text: settings.ravenDescription || "« Seen as a messenger between worlds, the raven is associated with transformation, mystery, and prophecy. It is a symbol of death and rebirth, linking it to the cycles of life. Ravens are frequently associated with witches due to their intelligence and dark plumage, making them ideal familiars. They are seen as conduits of wisdom and carriers of magical messages. »",
               delay: "0.5s",
             },
             {
-              title: "CROW",
-              text: settings.crowDescription || "Crows are symbols of adaptability, cunning, and community. They are often seen as harbingers of change and transformation.",
+              title: "CROW 🐦‍⬛",
+              text: settings.crowDescription || "« Crows are symbols of adaptability, cunning, and community. They are often seen as harbingers of change and transformation. The crow's connection to magic lies in its ability to mimic sounds, symbolising the blending of worlds and the power of words in spellwork. Its presence during rituals is believed to strengthen divination. Crows feature prominently in many cultures. In some Native American stories, they are considered creators or tricksters. »",
               delay: "0.65s",
             },
             {
-              title: "BLACKBIRD",
-              text: settings.blackbirdDescription || "Blackbirds are linked to mystery, intuition, and the unknown. Their song is said to call to the inner self, urging introspection.",
+              title: "BLACKBIRDS 🐦‍⬛👁️",
+              text: settings.blackbirdDescription || "« Blackbirds are linked to mystery, intuition, and the unknown. Their song is said to call to the inner self, urging introspection and spiritual awakening. A blackbird's song can be seen as a guide to other realms, useful for meditation or dream work. They are also considered guardians of secrets. In Celtic mythology, the blackbird is a guide to the Otherworld. Its melodious song is believed to open doorways between this world and the next. »",
               delay: "0.8s",
             },
           ].map((bird) => (
