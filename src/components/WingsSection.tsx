@@ -94,11 +94,21 @@ export default function WingsSection() {
           }`}
           style={{ transitionDelay: "0.3s", marginBottom: "60px" }}
         >
-          <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center">
+          <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center" style={{ marginBottom: "24px" }}>
             The Corbus Collection represents the revolt of man&apos;s soul in a
-            corrupted, cruel, and fake society we&apos;re all living in. Inspired
-            by the crow, a symbol of mystery, intelligence and freedom, Corbus
-            invites you to express your unique and rebellious personality.
+            corrupted, cruel, and fake society we&apos;re all living in.
+          </p>
+          <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center" style={{ marginBottom: "24px" }}>
+            Inspired by the crow, a symbol of mystery, intelligence and freedom,
+            Corbus invites you to express your unique and rebellious personality.
+          </p>
+          <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center">
+            The surname Corbus is a name for a person who is raven-haired or
+            dark-complexioned. The surname Corvi is derived from the Italian
+            word &laquo;&nbsp;corvo&nbsp;&raquo; which comes from the Latin
+            &laquo;&nbsp;corvus&nbsp;&raquo; which means raven or crow.
+            Furthermore, this nickname surname was often used to describe
+            priests 👁️
           </p>
         </div>
 
@@ -106,18 +116,18 @@ export default function WingsSection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             {
-              title: "RAVEN",
-              text: settings.ravenDescription || "Seen as a messenger between worlds, the raven is associated with transformation, mystery, and prophecy. It is a symbol of death and rebirth.",
+              title: "RAVEN 🐦‍⬛",
+              text: settings.ravenDescription || "« Seen as a messenger between worlds, the raven is associated with transformation, mystery, and prophecy. It is a symbol of death and rebirth, linking it to the cycles of life. Ravens are frequently associated with witches due to their intelligence and dark plumage, making them ideal familiars. They are seen as conduits of wisdom and carriers of magical messages. »",
               delay: "0.5s",
             },
             {
-              title: "CROW",
-              text: settings.crowDescription || "Crows are symbols of adaptability, cunning, and community. They are often seen as harbingers of change and transformation.",
+              title: "CROW 🐦‍⬛",
+              text: settings.crowDescription || "« Crows are symbols of adaptability, cunning, and community. They are often seen as harbingers of change and transformation. The crow's connection to magic lies in its ability to mimic sounds, symbolising the blending of worlds and the power of words in spellwork. Its presence during rituals is believed to strengthen divination. Crows feature prominently in many cultures. In some Native American stories, they are considered creators or tricksters. »",
               delay: "0.65s",
             },
             {
-              title: "BLACKBIRD",
-              text: settings.blackbirdDescription || "Blackbirds are linked to mystery, intuition, and the unknown. Their song is said to call to the inner self, urging introspection.",
+              title: "BLACKBIRDS 🐦‍⬛👁️",
+              text: settings.blackbirdDescription || "« Blackbirds are linked to mystery, intuition, and the unknown. Their song is said to call to the inner self, urging introspection and spiritual awakening. A blackbird's song can be seen as a guide to other realms, useful for meditation or dream work. They are also considered guardians of secrets. In Celtic mythology, the blackbird is a guide to the Otherworld. Its melodious song is believed to open doorways between this world and the next. »",
               delay: "0.8s",
             },
           ].map((bird) => (
