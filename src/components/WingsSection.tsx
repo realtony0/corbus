@@ -87,30 +87,19 @@ export default function WingsSection() {
           </p>
         </div>
 
-        {/* Text + crow image side by side */}
+        {/* Text section */}
         <div
-          className={`flex flex-col md:flex-row items-center gap-8 md:gap-12 transition-all duration-[1.2s] ease-out ${
+          className={`transition-all duration-[1.2s] ease-out ${
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
           style={{ transitionDelay: "0.3s", marginBottom: "60px" }}
         >
-          <p className="flex-1 text-white/70 text-sm md:text-[15px] leading-[2] text-center md:text-left">
+          <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center">
             The Corbus Collection represents the revolt of man&apos;s soul in a
             corrupted, cruel, and fake society we&apos;re all living in. Inspired
             by the crow, a symbol of mystery, intelligence and freedom, Corbus
             invites you to express your unique and rebellious personality.
           </p>
-
-          <div className="w-32 h-32 md:w-44 md:h-44 flex-shrink-0">
-            <Image
-              src="/images/logos/crows.jpg"
-              alt="Corbus crows"
-              width={176}
-              height={176}
-              className="w-full h-full object-contain"
-              style={{ filter: "invert(1) brightness(2) contrast(0.6)", opacity: 0.4 }}
-            />
-          </div>
         </div>
 
         {/* Three birds grid */}
