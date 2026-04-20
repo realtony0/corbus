@@ -6,8 +6,15 @@ import {
   deleteProduct,
 } from "@/lib/products";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const NO_CACHE = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+};
+
 export async function GET() {
-  return NextResponse.json(await getProducts());
+  return NextResponse.json(await getProducts(), { headers: NO_CACHE });
 }
 
 export async function POST(request: NextRequest) {
