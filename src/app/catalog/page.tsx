@@ -104,7 +104,7 @@ export default function CatalogPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
 
   useEffect(() => {
-    fetch("/api/products")
+    fetch("/api/products", { cache: "no-store" })
       .then((r) => r.json())
       .then((data: Product[]) => setProducts(data))
       .catch(() => setProducts([]));
