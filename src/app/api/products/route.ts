@@ -7,19 +7,19 @@ import {
 } from "@/lib/products";
 
 export async function GET() {
-  return NextResponse.json(getProducts());
+  return NextResponse.json(await getProducts());
 }
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const product = addProduct(body);
+  const product = await addProduct(body);
   return NextResponse.json(product, { status: 201 });
 }
 
 export async function PUT(request: NextRequest) {
   const body = await request.json();
   const { id, ...updates } = body;
-  const product = updateProduct(id, updates);
+  const product = await updateProduct(id, updates);
   if (!product) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -28,7 +28,7 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   const body = await request.json();
-  const success = deleteProduct(body.id);
+  const success = await deleteProduct(body.id);
   if (!success) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

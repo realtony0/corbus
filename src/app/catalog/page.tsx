@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { getProducts } from "@/lib/products";
 import { Product } from "@/lib/types";
 import { addToCart } from "@/lib/store";
 import FooterSection from "@/components/FooterSection";
@@ -101,9 +100,17 @@ function ProductCard({ product, delay }: { product: Product; delay: number }) {
 }
 
 export default function CatalogPage() {
-  const products = getProducts();
-  const categories = [...new Set(products.map((p) => p.category))];
+  const [products, setProducts] = useState<Product[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("all");
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((data: Product[]) => setProducts(data))
+      .catch(() => setProducts([]));
+  }, []);
+
+  const categories = [...new Set(products.map((p) => p.category))];
 
   const filtered =
     activeCategory === "all"
