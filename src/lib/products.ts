@@ -1,80 +1,103 @@
+import { sql } from "./db";
 import { Product } from "./types";
 
-// Products stored in memory - in production, use a database
-let products: Product[] = [
-  {
-    id: "corbus-a-era-white",
-    name: "CORBUS A ERA — White",
-    description:
-      "Catch Our Rebel Brand Unique Shit. T-shirt blanc avec le logo Corbus sur le devant et le design A ERA au dos.",
-    price: 20000,
-    currency: "XOF",
-    images: ["/images/products/a-era-white.jpg"],
-    sizes: ["S", "M", "L", "XL"],
-    category: "T-shirts",
-    inStock: false,
-    createdAt: "2024-01-01",
-  },
-  {
-    id: "corbus-a-era-black",
-    name: "CORBUS A ERA — Black",
-    description:
-      "Catch Our Rebel Brand Unique Shit. T-shirt noir avec le logo Corbus sur le devant et le design A ERA au dos.",
-    price: 20000,
-    currency: "XOF",
-    images: ["/images/products/a-era-black.jpg"],
-    sizes: ["S", "M", "L", "XL"],
-    category: "T-shirts",
-    inStock: false,
-    createdAt: "2024-01-01",
-  },
-  {
-    id: "corbus-embrace-white",
-    name: "CORBUS Embrace — White",
-    description:
-      '"Embrace the Corbus land, they hold the truth." T-shirt blanc avec le logo Corbus gothique et le design Embrace au dos.',
-    price: 20000,
-    currency: "XOF",
-    images: ["/images/products/embrace-white.jpg"],
-    sizes: ["S", "M", "L", "XL"],
-    category: "T-shirts",
-    inStock: false,
-    createdAt: "2024-01-01",
-  },
-];
-
-export function getProducts(): Product[] {
-  return products;
+interface ProductRow {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  currency: string;
+  images: string[];
+  sizes: string[];
+  category: string;
+  in_stock: boolean;
+  created_at: string | Date;
 }
 
-export function getProduct(id: string): Product | undefined {
-  return products.find((p) => p.id === id);
-}
-
-export function addProduct(
-  product: Omit<Product, "id" | "createdAt">
-): Product {
-  const newProduct: Product = {
-    ...product,
-    id: product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-    createdAt: new Date().toISOString(),
+function rowToProduct(row: ProductRow): Product {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    price: row.price,
+    currency: row.currency,
+    images: row.images,
+    sizes: row.sizes,
+    category: row.category,
+    inStock: row.in_stock,
+    createdAt:
+      row.created_at instanceof Date
+        ? row.created_at.toISOString()
+        : row.created_at,
   };
-  products.push(newProduct);
-  return newProduct;
 }
 
-export function updateProduct(
+export async function getProducts(): Promise<Product[]> {
+  const rows = (await sql`
+    SELECT id, name, description, price, currency, images, sizes, category, in_stock, created_at
+    FROM products
+    ORDER BY created_at ASC
+  `) as ProductRow[];
+  return rows.map(rowToProduct);
+}
+
+export async function getProduct(id: string): Promise<Product | undefined> {
+  const rows = (await sql`
+    SELECT id, name, description, price, currency, images, sizes, category, in_stock, created_at
+    FROM products
+    WHERE id = ${id}
+  `) as ProductRow[];
+  return rows[0] ? rowToProduct(rows[0]) : undefined;
+}
+
+export async function addProduct(
+  product: Omit<Product, "id" | "createdAt">
+): Promise<Product> {
+  const id = product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const rows = (await sql`
+    INSERT INTO products (id, name, description, price, currency, images, sizes, category, in_stock)
+    VALUES (
+      ${id},
+      ${product.name},
+      ${product.description},
+      ${product.price},
+      ${product.currency},
+      ${JSON.stringify(product.images)}::jsonb,
+      ${JSON.stringify(product.sizes)}::jsonb,
+      ${product.category},
+      ${product.inStock}
+    )
+    RETURNING id, name, description, price, currency, images, sizes, category, in_stock, created_at
+  `) as ProductRow[];
+  return rowToProduct(rows[0]);
+}
+
+export async function updateProduct(
   id: string,
   updates: Partial<Product>
-): Product | null {
-  const index = products.findIndex((p) => p.id === id);
-  if (index === -1) return null;
-  products[index] = { ...products[index], ...updates };
-  return products[index];
+): Promise<Product | null> {
+  const current = await getProduct(id);
+  if (!current) return null;
+  const merged = { ...current, ...updates };
+  const rows = (await sql`
+    UPDATE products
+    SET name = ${merged.name},
+        description = ${merged.description},
+        price = ${merged.price},
+        currency = ${merged.currency},
+        images = ${JSON.stringify(merged.images)}::jsonb,
+        sizes = ${JSON.stringify(merged.sizes)}::jsonb,
+        category = ${merged.category},
+        in_stock = ${merged.inStock}
+    WHERE id = ${id}
+    RETURNING id, name, description, price, currency, images, sizes, category, in_stock, created_at
+  `) as ProductRow[];
+  return rows[0] ? rowToProduct(rows[0]) : null;
 }
 
-export function deleteProduct(id: string): boolean {
-  const len = products.length;
-  products = products.filter((p) => p.id !== id);
-  return products.length < len;
+export async function deleteProduct(id: string): Promise<boolean> {
+  const rows = (await sql`
+    DELETE FROM products WHERE id = ${id} RETURNING id
+  `) as { id: string }[];
+  return rows.length > 0;
 }
