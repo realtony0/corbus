@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import LayoutWrapper from "@/components/LayoutWrapper";
 
@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   description:
     "Fashion with Spirit, Style with Meaning. Inspired by the crow, a symbol of mystery, intelligence and freedom.",
   keywords: ["Corbus", "streetwear", "fashion", "crow", "raven", "Senegal"],
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({

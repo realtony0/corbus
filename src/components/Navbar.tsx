@@ -38,17 +38,17 @@ export default function Navbar() {
             : "bg-transparent py-6"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-2">
           {/* Menu Button — 3 crow silhouettes in circles */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="flex gap-2 items-center group cursor-pointer p-1 -ml-1"
+            className="flex gap-1.5 sm:gap-2 items-center group cursor-pointer p-1 -ml-1 flex-shrink-0"
             aria-label="Menu"
           >
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="w-9 h-9 md:w-10 md:h-10 rounded-full border border-white/30 flex items-center justify-center transition-all duration-300 group-hover:border-white/70"
+                className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full border border-white/30 flex items-center justify-center transition-all duration-300 group-hover:border-white/70"
                 style={{
                   transitionDelay: `${i * 50}ms`,
                   transform: `rotate(${[-10, 0, 10][i]}deg)`,
@@ -90,15 +90,15 @@ export default function Navbar() {
           </Link>
 
           {/* Right: country + cart */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <CountrySelector />
-            <Link href="/cart" className="relative group p-2">
+            <Link href="/cart" aria-label="Cart" className="relative group p-2">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.5"
-                className="w-6 h-6 text-white/50 group-hover:text-white transition-colors"
+                className="w-6 h-6 text-white/70 group-hover:text-white transition-colors"
               >
                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
                 <line x1="3" y1="6" x2="21" y2="6" />

@@ -53,8 +53,8 @@ export default function CartPage() {
 
   if (cart.length === 0 && step === "cart") {
     return (
-      <section className="min-h-screen pb-20 bg-black flex items-center justify-center" style={{ paddingTop: "180px" }}>
-        <div className="text-center">
+      <section className="min-h-screen pb-20 bg-black flex items-center justify-center pt-[120px] md:pt-[180px]">
+        <div className="text-center px-6">
           <h1 className="font-gothic text-4xl mb-4">Your Cart</h1>
           <p className="text-white/40 mb-8">Your cart is empty.</p>
           <Link
@@ -69,9 +69,9 @@ export default function CartPage() {
   }
 
   return (
-    <section className="min-h-screen pb-20 bg-black" style={{ paddingTop: "180px" }}>
-      <div className="max-w-3xl mx-auto px-6">
-        <h1 className="font-gothic text-4xl md:text-5xl text-center mb-12">
+    <section className="min-h-screen pb-20 bg-black pt-[120px] md:pt-[180px]">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+        <h1 className="font-gothic text-4xl md:text-5xl text-center mb-8 md:mb-12">
           {step === "cart" ? "Your Cart" : "Checkout"}
         </h1>
 
@@ -82,24 +82,24 @@ export default function CartPage() {
               {cart.map((item) => (
                 <div
                   key={`${item.product.id}-${item.size}`}
-                  className="flex gap-4 border-b border-white/5 pb-6"
+                  className="flex gap-3 sm:gap-4 border-b border-white/5 pb-6"
                 >
                   <Image
                     src={item.product.images[0]}
                     alt={item.product.name}
                     width={80}
                     height={80}
-                    className="w-20 h-20 object-cover bg-neutral-900"
+                    className="w-16 h-16 sm:w-20 sm:h-20 object-cover bg-neutral-900 flex-shrink-0"
                   />
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium">{item.product.name}</h3>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-medium break-words">{item.product.name}</h3>
                     <p className="text-white/40 text-xs mt-1">Size: {item.size}</p>
                     <p className="text-white/40 text-xs">
                       {item.product.price.toLocaleString()} FCFA
                     </p>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       <button
                         onClick={() =>
                           updateQuantity(item.product.id, item.size, item.quantity - 1)
@@ -108,7 +108,7 @@ export default function CartPage() {
                       >
                         -
                       </button>
-                      <span className="text-sm w-6 text-center">{item.quantity}</span>
+                      <span className="text-sm w-5 sm:w-6 text-center">{item.quantity}</span>
                       <button
                         onClick={() =>
                           updateQuantity(item.product.id, item.size, item.quantity + 1)
