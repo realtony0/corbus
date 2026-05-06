@@ -720,6 +720,76 @@ export default function AdminPage() {
                     />
                   </div>
                   <div>
+                    <label style={s.label}>Paragraphe d&apos;accueil (manifeste)</label>
+                    <textarea
+                      value={settings.welcomeDescription}
+                      onChange={(e) => setSettings({ ...settings, welcomeDescription: e.target.value })}
+                      placeholder="The Corbus Collection represents the revolt..."
+                      rows={3}
+                      style={{ ...s.input, resize: "vertical" as const, fontFamily: "inherit" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Étymologie (paragraphe section accueil)</label>
+                    <textarea
+                      value={settings.etymologyText}
+                      onChange={(e) => setSettings({ ...settings, etymologyText: e.target.value })}
+                      placeholder="The surname Corbus is a name for..."
+                      rows={4}
+                      style={{ ...s.input, resize: "vertical" as const, fontFamily: "inherit" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Description Raven</label>
+                    <textarea
+                      value={settings.ravenDescription}
+                      onChange={(e) => setSettings({ ...settings, ravenDescription: e.target.value })}
+                      placeholder="« Seen as a messenger between worlds... »"
+                      rows={4}
+                      style={{ ...s.input, resize: "vertical" as const, fontFamily: "inherit" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Description Crow</label>
+                    <textarea
+                      value={settings.crowDescription}
+                      onChange={(e) => setSettings({ ...settings, crowDescription: e.target.value })}
+                      placeholder="« Crows are symbols of adaptability... »"
+                      rows={4}
+                      style={{ ...s.input, resize: "vertical" as const, fontFamily: "inherit" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Description Blackbirds</label>
+                    <textarea
+                      value={settings.blackbirdDescription}
+                      onChange={(e) => setSettings({ ...settings, blackbirdDescription: e.target.value })}
+                      placeholder="« Blackbirds are linked to mystery... »"
+                      rows={4}
+                      style={{ ...s.input, resize: "vertical" as const, fontFamily: "inherit" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Texte étymologie (section &laquo; The Name &raquo;)</label>
+                    <textarea
+                      value={settings.originText}
+                      onChange={(e) => setSettings({ ...settings, originText: e.target.value })}
+                      placeholder="The surname Corbus is a name for..."
+                      rows={4}
+                      style={{ ...s.input, resize: "vertical" as const, fontFamily: "inherit" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Citation finale (Inspired by the crow...)</label>
+                    <textarea
+                      value={settings.inspirationQuote}
+                      onChange={(e) => setSettings({ ...settings, inspirationQuote: e.target.value })}
+                      placeholder="Inspired by the crow..."
+                      rows={3}
+                      style={{ ...s.input, resize: "vertical" as const, fontFamily: "inherit" }}
+                    />
+                  </div>
+                  <div>
                     <label style={s.label}>Durée écran de chargement (ms)</label>
                     <input
                       type="number"

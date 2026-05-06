@@ -94,17 +94,11 @@ export default function WingsSection() {
           }`}
           style={{ transitionDelay: "0.3s", marginBottom: "60px" }}
         >
-          <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center" style={{ marginBottom: "24px" }}>
-            The Corbus Collection represents the revolt of man&apos;s soul in a
-            corrupted, cruel, and fake society we&apos;re all living in.
+          <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center whitespace-pre-line" style={{ marginBottom: "24px" }}>
+            {settings.welcomeDescription || "The Corbus Collection represents the revolt of man's soul in a corrupted, cruel, and fake society we're all living in."}
           </p>
-          <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center">
-            The surname Corbus is a name for a person who is raven-haired or
-            dark-complexioned. The surname Corvi is derived from the Italian
-            word &laquo;&nbsp;corvo&nbsp;&raquo; which comes from the Latin
-            &laquo;&nbsp;corvus&nbsp;&raquo; which means raven or crow.
-            Furthermore, this nickname surname was often used to describe
-            priests 👁️
+          <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center whitespace-pre-line">
+            {settings.etymologyText || "The surname Corbus is a name for a person who is raven-haired or dark-complexioned. The surname Corvi is derived from the Italian word « corvo » which comes from the Latin « corvus » which means raven or crow. Furthermore, this nickname surname was often used to describe priests."}
           </p>
         </div>
 
@@ -122,7 +116,7 @@ export default function WingsSection() {
               delay: "0.65s",
             },
             {
-              title: "BLACKBIRDS 🐦‍⬛👁️",
+              title: "BLACKBIRDS 🐦‍⬛",
               text: settings.blackbirdDescription || "« Blackbirds are linked to mystery, intuition, and the unknown. Their song is said to call to the inner self, urging introspection and spiritual awakening. A blackbird's song can be seen as a guide to other realms, useful for meditation or dream work. They are also considered guardians of secrets. In Celtic mythology, the blackbird is a guide to the Otherworld. Its melodious song is believed to open doorways between this world and the next. »",
               delay: "0.8s",
             },

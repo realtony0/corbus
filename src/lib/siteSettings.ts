@@ -16,10 +16,12 @@ export interface SiteSettings {
   welcomeSubtitle: string;
   welcomeDescription: string;
   quoteText: string;
+  etymologyText: string;
   ravenDescription: string;
   crowDescription: string;
   blackbirdDescription: string;
   originText: string;
+  inspirationQuote: string;
   // Appearance
   loadingDuration: number;
   bodyFont: string;
@@ -38,10 +40,12 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   welcomeSubtitle: "",
   welcomeDescription: "",
   quoteText: "Fashion with Spirit, Style with Meaning",
+  etymologyText: "",
   ravenDescription: "",
   crowDescription: "",
   blackbirdDescription: "",
   originText: "",
+  inspirationQuote: "",
   loadingDuration: 3000,
   bodyFont: "Inter",
   headingFont: "Cormorant Garamond",

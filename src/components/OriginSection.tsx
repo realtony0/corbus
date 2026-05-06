@@ -126,9 +126,8 @@ export default function OriginSection() {
           style={{ transitionDelay: "0.6s" }}
         >
           <div className="w-12 h-px bg-white/10 mx-auto" style={{ marginBottom: "20px" }} />
-          <p className="text-white/45 text-sm italic tracking-wide leading-relaxed max-w-lg mx-auto">
-            Inspired by the crow, a symbol of mystery, intelligence and freedom,
-            Corbus invites you to express your unique and rebellious personality.
+          <p className="text-white/45 text-sm italic tracking-wide leading-relaxed max-w-lg mx-auto whitespace-pre-line">
+            {settings.inspirationQuote || "Inspired by the crow, a symbol of mystery, intelligence and freedom, Corbus invites you to express your unique and rebellious personality."}
           </p>
         </div>
       </div>
