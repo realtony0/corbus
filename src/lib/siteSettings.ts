@@ -60,6 +60,24 @@ function notify() {
   listeners.forEach((l) => l());
 }
 
+// Strip eye-related emoji (👁 👁️ 👀 🗨 with optional variation selector / ZWJ sequences)
+const EYE_EMOJI_RE = /[\u{1F441}\u{1F440}\u{1F573}](?:️)?(?:‍[\u{1F5E8}\u{1F5E9}](?:️)?)?/gu;
+
+function stripEyeEmoji<T>(value: T): T {
+  if (typeof value === "string") {
+    return value.replace(EYE_EMOJI_RE, "").replace(/[ \t]+([.,;!?])/g, "$1").trim() as unknown as T;
+  }
+  return value;
+}
+
+function sanitizeSettings(raw: Partial<SiteSettings>): Partial<SiteSettings> {
+  const out: Record<string, unknown> = { ...raw };
+  for (const key of Object.keys(out)) {
+    out[key] = stripEyeEmoji(out[key]);
+  }
+  return out as Partial<SiteSettings>;
+}
+
 function init() {
   if (initialized) return;
   if (typeof window === "undefined") return;
@@ -68,7 +86,14 @@ function init() {
     const saved = localStorage.getItem(SETTINGS_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      settings = { ...DEFAULT_SITE_SETTINGS, ...parsed };
+      const cleaned = sanitizeSettings(parsed);
+      settings = { ...DEFAULT_SITE_SETTINGS, ...cleaned };
+      // Persist the cleaned version so it doesn't need to run again
+      const before = JSON.stringify(parsed);
+      const after = JSON.stringify(cleaned);
+      if (before !== after) {
+        localStorage.setItem(SETTINGS_KEY, after);
+      }
     }
   } catch {
     // ignore parse errors
