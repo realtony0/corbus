@@ -53,7 +53,7 @@ export default function CartPage() {
 
   if (cart.length === 0 && step === "cart") {
     return (
-      <section className="min-h-screen pb-20 bg-black flex items-center justify-center" style={{ paddingTop: "180px" }}>
+      <section className="min-h-screen pb-20 bg-black flex items-center justify-center pt-[110px] md:pt-[180px]">
         <div className="text-center">
           <h1 className="font-gothic text-4xl mb-4">Your Cart</h1>
           <p className="text-white/40 mb-8">Your cart is empty.</p>
@@ -69,7 +69,7 @@ export default function CartPage() {
   }
 
   return (
-    <section className="min-h-screen pb-20 bg-black" style={{ paddingTop: "180px" }}>
+    <section className="min-h-screen pb-20 bg-black pt-[110px] md:pt-[180px]">
       <div className="max-w-3xl mx-auto px-6">
         <h1 className="font-gothic text-4xl md:text-5xl text-center mb-12">
           {step === "cart" ? "Your Cart" : "Checkout"}
