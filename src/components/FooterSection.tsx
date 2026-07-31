@@ -8,7 +8,7 @@ export default function FooterSection() {
   return (
     <footer className="relative bg-black overflow-hidden">
       {/* Top separator */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="w-full h-px" style={{ background: "linear-gradient(to right, transparent, rgba(200,169,110,0.2), transparent)" }} />
 
       <div
         className="relative z-10 flex flex-col items-center px-8"
@@ -22,8 +22,8 @@ export default function FooterSection() {
 
         {/* Tagline */}
         <p
-          className="text-white/35 text-[10px] tracking-[0.5em] uppercase text-center"
-          style={{ marginTop: "20px" }}
+          className="text-[10px] tracking-[0.5em] uppercase text-center"
+          style={{ marginTop: "20px", color: "var(--color-accent)", opacity: 0.6 }}
         >
           {settings.tagline}
         </p>
@@ -51,8 +51,8 @@ export default function FooterSection() {
 
         {/* Separator */}
         <div
-          className="w-12 h-px bg-white/10"
-          style={{ marginTop: "60px", marginBottom: "60px" }}
+          className="w-12 h-px"
+          style={{ marginTop: "60px", marginBottom: "60px", background: "var(--color-accent)", opacity: 0.2 }}
         />
 
         {/* Social links */}

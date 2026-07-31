@@ -93,7 +93,7 @@ function ProductCard({ product, delay }: { product: Product; delay: number }) {
       <h3 className="text-[13px] md:text-sm font-normal tracking-[0.1em] text-white/80 group-hover:text-white transition-colors duration-300" style={{ marginBottom: "6px" }}>
         {product.name}
       </h3>
-      <p className="text-[13px] text-white/35 font-light tracking-wider">
+      <p className="text-[13px] font-light tracking-wider" style={{ color: "var(--color-accent)", opacity: 0.65 }}>
         {product.price.toLocaleString()} €
       </p>
     </div>
@@ -134,7 +134,7 @@ export default function CatalogPage() {
                 onClick={() => setActiveCategory("all")}
                 className={`px-5 py-2 text-[11px] tracking-[0.2em] uppercase rounded-full transition-all duration-300 cursor-pointer ${
                   activeCategory === "all"
-                    ? "bg-white text-black"
+                    ? "bg-accent-active text-black"
                     : "bg-white/[0.04] text-white/40 hover:bg-white/[0.08] hover:text-white/60"
                 }`}
               >
@@ -146,7 +146,7 @@ export default function CatalogPage() {
                   onClick={() => setActiveCategory(cat)}
                   className={`px-5 py-2 text-[11px] tracking-[0.2em] uppercase rounded-full transition-all duration-300 cursor-pointer ${
                     activeCategory === cat
-                      ? "bg-white text-black"
+                      ? "bg-accent-active text-black"
                       : "bg-white/[0.04] text-white/40 hover:bg-white/[0.08] hover:text-white/60"
                   }`}
                 >

@@ -40,7 +40,7 @@ export default function ProductCard({ product }: { product: Product }) {
       <h3 className="text-sm font-medium tracking-wider mb-1">
         {product.name}
       </h3>
-      <p className="text-white/40 text-sm mb-3">
+      <p className="text-sm mb-3" style={{ color: "var(--color-accent)", opacity: 0.7 }}>
         {product.price.toLocaleString()} €
       </p>
 
