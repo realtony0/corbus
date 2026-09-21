@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import FooterSection from "@/components/FooterSection";
+import { useSiteSettings } from "@/lib/useSiteSettings";
 
 function GalleryImage({
   src,
@@ -58,6 +59,7 @@ function GalleryImage({
 }
 
 export default function GalleryView({ photos }: { photos: string[] }) {
+  const settings = useSiteSettings();
   const [lightbox, setLightbox] = useState<number | null>(null);
 
   // Photos are managed from /admin and stored in Supabase; this page used to
@@ -106,13 +108,13 @@ export default function GalleryView({ photos }: { photos: string[] }) {
           {/* Header */}
           <div className="text-center" style={{ marginBottom: "50px" }}>
             <p className="text-white/30 text-[10px] tracking-[0.5em] uppercase" style={{ marginBottom: "14px" }}>
-              Lookbook
+              {settings.galleryEyebrow || "Lookbook"}
             </p>
             <h1 className="font-gothic text-3xl md:text-5xl" style={{ marginBottom: "12px" }}>
-              Gallery
+              {settings.galleryTitle || "Gallery"}
             </h1>
             <p className="text-white/40 text-xs tracking-[0.3em] uppercase">
-              The Corbus Collective
+              {settings.gallerySubtitle || "The Corbus Collective"}
             </p>
           </div>
 

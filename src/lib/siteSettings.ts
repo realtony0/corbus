@@ -17,10 +17,21 @@ export interface SiteSettings {
   welcomeSubtitle: string;
   welcomeDescription: string;
   quoteText: string;
+  ravenTitle: string;
   ravenDescription: string;
+  crowTitle: string;
   crowDescription: string;
+  blackbirdTitle: string;
   blackbirdDescription: string;
   originText: string;
+  // Page headings
+  aboutTitle: string;
+  aboutSubtitle: string;
+  catalogTitle: string;
+  galleryEyebrow: string;
+  galleryTitle: string;
+  gallerySubtitle: string;
+  footerNote: string;
   // Appearance
   loadingDuration: number;
   bodyFont: string;
@@ -39,10 +50,20 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   welcomeSubtitle: "",
   welcomeDescription: "",
   quoteText: "Fashion with Spirit, Style with Meaning",
+  ravenTitle: "RAVEN 🐦‍⬛",
   ravenDescription: "",
+  crowTitle: "CROW 🐦‍⬛",
   crowDescription: "",
+  blackbirdTitle: "BLACKBIRDS 🐦‍⬛",
   blackbirdDescription: "",
   originText: "",
+  aboutTitle: "Who & What We Are?",
+  aboutSubtitle: "Fashion with Spirit, Style with Meaning",
+  catalogTitle: "All Products",
+  galleryEyebrow: "Lookbook",
+  galleryTitle: "Gallery",
+  gallerySubtitle: "The Corbus Collective",
+  footerNote: "",
   loadingDuration: 1400,
   bodyFont: "Inter",
   headingFont: "Cormorant Garamond",

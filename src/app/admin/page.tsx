@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Product } from "@/lib/types";
+import { Order, OrderStatus, Product } from "@/lib/types";
+import { ORDER_STATUSES, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from "@/lib/orderStatus";
 import { updateSiteSettings, DEFAULT_SITE_SETTINGS, SiteSettings } from "@/lib/siteSettings";
 
 const DEFAULT_GALLERY = [
@@ -22,6 +23,8 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersError, setOrdersError] = useState("");
   const [gallery, setGallery] = useState<string[]>(DEFAULT_GALLERY);
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [showForm, setShowForm] = useState(false);
@@ -31,6 +34,7 @@ export default function AdminPage() {
   const [uploading, setUploading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
+  const [newSize, setNewSize] = useState("");
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -39,7 +43,21 @@ export default function AdminPage() {
     sizes: ["S", "M", "L", "XL"],
     category: "T-shirts",
     inStock: true,
+    stock: {} as Record<string, number>,
+    sortOrder: 0,
   });
+
+  const EMPTY_FORM = {
+    name: "",
+    description: "",
+    price: 0,
+    images: [""],
+    sizes: ["S", "M", "L", "XL"],
+    category: "T-shirts",
+    inStock: true,
+    stock: {} as Record<string, number>,
+    sortOrder: 0,
+  };
 
   // An expired session used to make every button fail silently.
   const apiWrite = useCallback(
@@ -74,10 +92,27 @@ export default function AdminPage() {
       .finally(() => setCheckingSession(false));
   }, []);
 
+  const fetchOrders = useCallback(async () => {
+    try {
+      const res = await fetch("/api/orders", { cache: "no-store" });
+      if (res.status === 401) { setAuthenticated(false); return; }
+      if (res.ok) {
+        setOrders(await res.json());
+        setOrdersError("");
+      } else {
+        const body = await res.json().catch(() => ({}));
+        setOrdersError(body.error || "Impossible de charger les commandes.");
+      }
+    } catch {
+      setOrdersError("Impossible de charger les commandes.");
+    }
+  }, []);
+
   // Gallery and settings live in Supabase, not in this browser's localStorage.
   useEffect(() => {
     if (!authenticated) return;
     fetchProducts();
+    fetchOrders();
     fetch("/api/gallery", { cache: "no-store" })
       .then((r) => r.json())
       .then((d: string[]) => Array.isArray(d) && setGallery(d))
@@ -86,7 +121,7 @@ export default function AdminPage() {
       .then((r) => r.json())
       .then((d: SiteSettings) => setSettings({ ...DEFAULT_SETTINGS, ...d }))
       .catch(() => {});
-  }, [authenticated, fetchProducts]);
+  }, [authenticated, fetchProducts, fetchOrders]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,7 +155,7 @@ export default function AdminPage() {
     if (!res || !res.ok) return;
     setShowForm(false);
     setEditing(null);
-    setForm({ name: "", description: "", price: 0, images: [""], sizes: ["S", "M", "L", "XL"], category: "T-shirts", inStock: true });
+    setForm({ ...EMPTY_FORM });
     fetchProducts();
   };
 
@@ -140,6 +175,8 @@ export default function AdminPage() {
       sizes: product.sizes,
       category: product.category,
       inStock: product.inStock,
+      stock: product.stock ?? {},
+      sortOrder: product.sortOrder ?? 0,
     });
     setShowForm(true);
   };
@@ -150,6 +187,18 @@ export default function AdminPage() {
       inStock: !product.inStock,
     });
     fetchProducts();
+  };
+
+  const setOrderStatus = async (id: string, status: OrderStatus) => {
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
+    const res = await apiWrite("/api/orders", "PUT", { id, status });
+    if (!res || !res.ok) fetchOrders(); // revert to whatever the server has
+  };
+
+  const removeOrder = async (id: string, reference: string) => {
+    if (!confirm(`Supprimer définitivement la commande ${reference} ?`)) return;
+    await apiWrite("/api/orders", "DELETE", { id });
+    fetchOrders();
   };
 
   const saveGallery = async (photos: string[]) => {
@@ -421,6 +470,13 @@ export default function AdminPage() {
                   { label: "En stock", value: inStock, color: "#16a34a", bg: "#f0fdf4" },
                   { label: "Épuisés", value: outOfStock, color: "#dc2626", bg: "#fef2f2" },
                   { label: "Photos galerie", value: gallery.length, color: "#8b5cf6", bg: "#faf5ff" },
+                  { label: "Commandes", value: orders.length, color: "#0891b2", bg: "#ecfeff" },
+                  {
+                    label: "À traiter",
+                    value: orders.filter((o) => o.status === "received").length,
+                    color: "#ea580c",
+                    bg: "#fff7ed",
+                  },
                 ].map((stat) => (
                   <div key={stat.label} style={s.card}>
                     <p style={{ fontSize: 12, color: "#888", fontWeight: 500, textTransform: "uppercase", letterSpacing: 0.5, margin: "0 0 8px" }}>{stat.label}</p>
@@ -477,7 +533,7 @@ export default function AdminPage() {
                 <button
                   onClick={() => {
                     setEditing(null);
-                    setForm({ name: "", description: "", price: 0, images: [""], sizes: ["S", "M", "L", "XL"], category: "T-shirts", inStock: true });
+                    setForm({ ...EMPTY_FORM });
                     setShowForm(true);
                   }}
                   style={{ ...s.btn, background: "#111", color: "#fff", display: "flex", alignItems: "center", gap: 6 }}
@@ -592,12 +648,90 @@ export default function AdminPage() {
 
           {/* ─── ORDERS ──────────────────────────────────────── */}
           {activeTab === "orders" && (
-            <div style={{ ...s.card, textAlign: "center", padding: 80 }}>
-              <p style={{ fontSize: 48, margin: "0 0 16px" }}>📦</p>
-              <h3 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 8px" }}>Bientôt disponible</h3>
-              <p style={{ fontSize: 14, color: "#888", maxWidth: 400, margin: "0 auto" }}>
-                Le suivi des commandes sera intégré prochainement. Les commandes passent actuellement par WhatsApp.
-              </p>
+            <div>
+              {ordersError && (
+                <div style={{ ...s.card, border: "1px solid #fecaca", marginBottom: 16 }}>
+                  <p style={{ fontSize: 13, color: "#dc2626", margin: 0 }}>{ordersError}</p>
+                </div>
+              )}
+
+              {orders.length === 0 && !ordersError && (
+                <div style={{ ...s.card, textAlign: "center", padding: 80 }}>
+                  <p style={{ fontSize: 48, margin: "0 0 16px" }}>📦</p>
+                  <h3 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 8px" }}>Aucune commande</h3>
+                  <p style={{ fontSize: 14, color: "#888", maxWidth: 420, margin: "0 auto" }}>
+                    Chaque commande validée au panier est enregistrée ici, même si
+                    le client n&apos;envoie jamais son message WhatsApp.
+                  </p>
+                </div>
+              )}
+
+              {orders.map((o) => {
+                const c = ORDER_STATUS_COLORS[o.status] ?? { bg: "#f5f5f5", fg: "#666" };
+                return (
+                  <div key={o.id} style={{ ...s.card, marginBottom: 12 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
+                      <div style={{ minWidth: 200 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                          <strong style={{ fontSize: 15 }}>{o.reference}</strong>
+                          <span style={{ background: c.bg, color: c.fg, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 999 }}>
+                            {ORDER_STATUS_LABELS[o.status] ?? o.status}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: 13, color: "#444", margin: "0 0 2px" }}>
+                          {o.customerName} — <a href={`tel:${o.customerPhone}`} style={{ color: "#2563eb" }}>{o.customerPhone}</a>
+                        </p>
+                        <p style={{ fontSize: 12, color: "#999", margin: 0 }}>
+                          {[o.address, o.city, o.country].filter(Boolean).join(", ")}
+                        </p>
+                        <p style={{ fontSize: 12, color: "#bbb", margin: "4px 0 0" }}>
+                          {new Date(o.createdAt).toLocaleString("fr-FR")}
+                        </p>
+                      </div>
+
+                      <div style={{ flex: 1, minWidth: 220 }}>
+                        {o.items.map((it, i) => (
+                          <p key={i} style={{ fontSize: 13, color: "#444", margin: "0 0 4px" }}>
+                            {it.quantity} × {it.name}
+                            {it.size ? ` (${it.size})` : ""} — {(it.price * it.quantity).toLocaleString()} {o.currency}
+                          </p>
+                        ))}
+                        <p style={{ fontSize: 14, fontWeight: 600, margin: "8px 0 0" }}>
+                          Total : {o.total.toLocaleString()} {o.currency}
+                        </p>
+                      </div>
+
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
+                        <select
+                          value={o.status}
+                          onChange={(e) => setOrderStatus(o.id, e.target.value as OrderStatus)}
+                          style={{ ...s.input, padding: "6px 10px", width: 150 }}
+                        >
+                          {ORDER_STATUSES.map((st) => (
+                            <option key={st} value={st}>{ORDER_STATUS_LABELS[st]}</option>
+                          ))}
+                        </select>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <a
+                            href={`https://wa.me/${o.customerPhone.replace(/\D/g, "")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ ...s.btn, background: "#ecfdf5", color: "#047857", textDecoration: "none", fontSize: 12 }}
+                          >
+                            WhatsApp
+                          </a>
+                          <button
+                            onClick={() => removeOrder(o.id, o.reference)}
+                            style={{ ...s.btn, background: "#fef2f2", color: "#dc2626", fontSize: 12 }}
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -741,6 +875,106 @@ export default function AdminPage() {
                       value={settings.welcomeSubtitle}
                       onChange={(e) => setSettings({ ...settings, welcomeSubtitle: e.target.value })}
                       placeholder="Sous-titre optionnel"
+                      style={s.input}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Titre carte RAVEN</label>
+                    <input
+                      type="text"
+                      value={settings.ravenTitle}
+                      onChange={(e) => setSettings({ ...settings, ravenTitle: e.target.value })}
+                      placeholder="RAVEN"
+                      style={s.input}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Titre carte CROW</label>
+                    <input
+                      type="text"
+                      value={settings.crowTitle}
+                      onChange={(e) => setSettings({ ...settings, crowTitle: e.target.value })}
+                      placeholder="CROW"
+                      style={s.input}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Titre carte BLACKBIRDS</label>
+                    <input
+                      type="text"
+                      value={settings.blackbirdTitle}
+                      onChange={(e) => setSettings({ ...settings, blackbirdTitle: e.target.value })}
+                      placeholder="BLACKBIRDS"
+                      style={s.input}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Titre page « Qui sommes-nous »</label>
+                    <input
+                      type="text"
+                      value={settings.aboutTitle}
+                      onChange={(e) => setSettings({ ...settings, aboutTitle: e.target.value })}
+                      placeholder="Who & What We Are?"
+                      style={s.input}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Sous-titre page « Qui sommes-nous »</label>
+                    <input
+                      type="text"
+                      value={settings.aboutSubtitle}
+                      onChange={(e) => setSettings({ ...settings, aboutSubtitle: e.target.value })}
+                      placeholder="Fashion with Spirit, Style with Meaning"
+                      style={s.input}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Titre du catalogue</label>
+                    <input
+                      type="text"
+                      value={settings.catalogTitle}
+                      onChange={(e) => setSettings({ ...settings, catalogTitle: e.target.value })}
+                      placeholder="All Products"
+                      style={s.input}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Surtitre de la galerie</label>
+                    <input
+                      type="text"
+                      value={settings.galleryEyebrow}
+                      onChange={(e) => setSettings({ ...settings, galleryEyebrow: e.target.value })}
+                      placeholder="Lookbook"
+                      style={s.input}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Titre de la galerie</label>
+                    <input
+                      type="text"
+                      value={settings.galleryTitle}
+                      onChange={(e) => setSettings({ ...settings, galleryTitle: e.target.value })}
+                      placeholder="Gallery"
+                      style={s.input}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Sous-titre de la galerie</label>
+                    <input
+                      type="text"
+                      value={settings.gallerySubtitle}
+                      onChange={(e) => setSettings({ ...settings, gallerySubtitle: e.target.value })}
+                      placeholder="The Corbus Collective"
+                      style={s.input}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Mention du pied de page</label>
+                    <input
+                      type="text"
+                      value={settings.footerNote}
+                      onChange={(e) => setSettings({ ...settings, footerNote: e.target.value })}
+                      placeholder="© 2026 CORBUS. All rights reserved."
                       style={s.input}
                     />
                   </div>
@@ -925,43 +1159,135 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Sizes */}
+              {/* Sizes and per-size stock */}
               <div>
-                <label style={s.label}>Tailles</label>
-                <div style={{ display: "flex", gap: 8 }}>
-                  {["S", "M", "L", "XL"].map((sz) => (
-                    <button
-                      key={sz}
-                      type="button"
-                      onClick={() => {
-                        const sizes = form.sizes.includes(sz) ? form.sizes.filter((s) => s !== sz) : [...form.sizes, sz];
-                        setForm({ ...form, sizes });
-                      }}
-                      style={{
-                        ...s.btn,
-                        background: form.sizes.includes(sz) ? "#111" : "#f5f5f5",
-                        color: form.sizes.includes(sz) ? "#fff" : "#666",
-                        width: 44,
-                        textAlign: "center" as const,
-                      }}
-                    >
-                      {sz}
-                    </button>
+                <label style={s.label}>Tailles et stock</label>
+                <p style={{ fontSize: 12, color: "#999", margin: "0 0 10px" }}>
+                  Laisse le stock vide pour ne pas le suivre. À 0, la taille
+                  apparaît barrée et non sélectionnable sur le site.
+                </p>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
+                  {form.sizes.map((sz) => (
+                    <div key={sz} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ width: 56, fontSize: 13, fontWeight: 600 }}>{sz}</span>
+                      <input
+                        type="number"
+                        min={0}
+                        placeholder="non suivi"
+                        value={form.stock[sz] ?? ""}
+                        onChange={(e) => {
+                          const stock = { ...form.stock };
+                          if (e.target.value === "") delete stock[sz];
+                          else stock[sz] = Math.max(0, Number(e.target.value));
+                          setForm({ ...form, stock });
+                        }}
+                        style={{ ...s.input, width: 120, padding: "6px 10px" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const stock = { ...form.stock };
+                          delete stock[sz];
+                          setForm({ ...form, sizes: form.sizes.filter((x) => x !== sz), stock });
+                        }}
+                        style={{ ...s.btn, background: "#fef2f2", color: "#dc2626", fontSize: 12 }}
+                      >
+                        Retirer
+                      </button>
+                    </div>
                   ))}
+                  {form.sizes.length === 0 && (
+                    <p style={{ fontSize: 13, color: "#bbb", margin: 0 }}>Aucune taille.</p>
+                  )}
                 </div>
+
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    type="text"
+                    value={newSize}
+                    placeholder="Ajouter une taille (S, 42, Unique…)"
+                    onChange={(e) => setNewSize(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key !== "Enter") return;
+                      e.preventDefault();
+                      const v = newSize.trim();
+                      if (v && !form.sizes.includes(v)) {
+                        setForm({ ...form, sizes: [...form.sizes, v] });
+                      }
+                      setNewSize("");
+                    }}
+                    style={{ ...s.input, flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = newSize.trim();
+                      if (v && !form.sizes.includes(v)) {
+                        setForm({ ...form, sizes: [...form.sizes, v] });
+                      }
+                      setNewSize("");
+                    }}
+                    style={{ ...s.btn, background: "#111", color: "#fff" }}
+                  >
+                    Ajouter
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label style={s.label}>Ordre dans le catalogue</label>
+                <input
+                  type="number"
+                  value={form.sortOrder}
+                  onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })}
+                  style={{ ...s.input, width: 140 }}
+                />
+                <p style={{ fontSize: 12, color: "#999", margin: "6px 0 0" }}>
+                  Le plus petit nombre s&apos;affiche en premier.
+                </p>
               </div>
 
               {/* Images */}
               <div>
                 <label style={s.label}>Images</label>
+                <p style={{ fontSize: 12, color: "#999", margin: "0 0 10px" }}>
+                  La première image (encadrée) est celle qui s&apos;affiche dans le catalogue.
+                </p>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
-                  {form.images.filter(Boolean).map((img, i) => (
-                    <div key={i} style={{ position: "relative", width: 72, height: 72 }}>
-                      <img src={img} alt="" style={{ width: 72, height: 72, borderRadius: 8, objectFit: "cover", border: "1px solid #eee" }} />
+                  {form.images.filter(Boolean).map((img, i, all) => (
+                    <div key={`${img}-${i}`} style={{ position: "relative", width: 72 }}>
+                      <img src={img} alt="" style={{ width: 72, height: 72, borderRadius: 8, objectFit: "cover", border: i === 0 ? "2px solid #111" : "1px solid #eee" }} />
                       <button
-                        onClick={() => setForm({ ...form, images: form.images.filter((_, j) => j !== i) })}
+                        onClick={() => setForm({ ...form, images: all.filter((_, j) => j !== i) })}
+                        title="Supprimer"
                         style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: 10, background: "#dc2626", color: "#fff", border: "none", fontSize: 11, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
                       >✕</button>
+                      {/* The first image is the one the catalog shows. */}
+                      <div style={{ display: "flex", gap: 4, marginTop: 4, justifyContent: "center" }}>
+                        <button
+                          type="button"
+                          disabled={i === 0}
+                          title="Déplacer à gauche"
+                          onClick={() => {
+                            const next = [...all];
+                            [next[i - 1], next[i]] = [next[i], next[i - 1]];
+                            setForm({ ...form, images: next });
+                          }}
+                          style={{ flex: 1, border: "1px solid #eee", background: "#fafafa", borderRadius: 4, fontSize: 11, cursor: i === 0 ? "not-allowed" : "pointer", opacity: i === 0 ? 0.3 : 1 }}
+                        >←</button>
+                        <button
+                          type="button"
+                          disabled={i === all.length - 1}
+                          title="Déplacer à droite"
+                          onClick={() => {
+                            const next = [...all];
+                            [next[i], next[i + 1]] = [next[i + 1], next[i]];
+                            setForm({ ...form, images: next });
+                          }}
+                          style={{ flex: 1, border: "1px solid #eee", background: "#fafafa", borderRadius: 4, fontSize: 11, cursor: i === all.length - 1 ? "not-allowed" : "pointer", opacity: i === all.length - 1 ? 0.3 : 1 }}
+                        >→</button>
+                      </div>
                     </div>
                   ))}
                 </div>

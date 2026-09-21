@@ -11,11 +11,13 @@ interface ProductRow {
   sizes: string[];
   category: string;
   in_stock: boolean;
+  stock: Record<string, number> | null;
+  sort_order: number;
   created_at: string;
 }
 
 const COLUMNS =
-  "id, name, description, price, currency, images, sizes, category, in_stock, created_at";
+  "id, name, description, price, currency, images, sizes, category, in_stock, stock, sort_order, created_at";
 
 function rowToProduct(row: ProductRow): Product {
   return {
@@ -28,6 +30,8 @@ function rowToProduct(row: ProductRow): Product {
     sizes: row.sizes ?? [],
     category: row.category,
     inStock: row.in_stock,
+    stock: row.stock ?? {},
+    sortOrder: row.sort_order ?? 0,
     createdAt: new Date(row.created_at).toISOString(),
   };
 }
@@ -48,6 +52,7 @@ export async function getProducts(): Promise<Product[]> {
   const { data, error } = await getSupabase()
     .from("products")
     .select(COLUMNS)
+    .order("sort_order", { ascending: true })
     .order("created_at", { ascending: true });
   if (error) throw new Error(`getProducts: ${error.message}`);
   return (data as ProductRow[]).map(rowToProduct);
@@ -98,6 +103,8 @@ export async function addProduct(
       sizes: product.sizes ?? [],
       category: product.category ?? "",
       in_stock: product.inStock ?? false,
+      stock: product.stock ?? {},
+      sort_order: product.sortOrder ?? 0,
     })
     .select(COLUMNS)
     .single();
@@ -120,6 +127,8 @@ export async function updateProduct(
   if (updates.sizes !== undefined) patch.sizes = updates.sizes;
   if (updates.category !== undefined) patch.category = updates.category;
   if (updates.inStock !== undefined) patch.in_stock = updates.inStock;
+  if (updates.stock !== undefined) patch.stock = updates.stock;
+  if (updates.sortOrder !== undefined) patch.sort_order = updates.sortOrder;
 
   if (Object.keys(patch).length === 0) {
     return (await getProduct(id)) ?? null;

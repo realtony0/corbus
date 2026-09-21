@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Product } from "@/lib/types";
 import { addToCart } from "@/lib/store";
+import { useSiteSettings } from "@/lib/useSiteSettings";
 import FooterSection from "@/components/FooterSection";
 
 function ProductCard({ product, delay }: { product: Product; delay: number }) {
@@ -17,8 +18,15 @@ function ProductCard({ product, delay }: { product: Product; delay: number }) {
     return () => clearTimeout(timer);
   }, [delay]);
 
+  // A size with a tracked quantity of 0 is sold out; a size absent from the
+  // stock map is untracked and stays available.
+  const sizeSoldOut = (size: string) => product.stock?.[size] === 0;
+  const allSizesSoldOut =
+    product.sizes.length > 0 && product.sizes.every(sizeSoldOut);
+  const available = product.inStock && !allSizesSoldOut;
+
   const handleAdd = () => {
-    if (!selectedSize || !product.inStock) return;
+    if (!selectedSize || !available || sizeSoldOut(selectedSize)) return;
     addToCart(product, selectedSize);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
@@ -45,22 +53,29 @@ function ProductCard({ product, delay }: { product: Product; delay: number }) {
         />
 
         {/* Hover overlay with quick actions */}
-        {product.inStock && (
+        {available && (
           <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-gradient-to-t from-black/90 via-black/70 to-transparent" style={{ padding: "40px 20px 20px" }}>
             <div className="flex justify-center gap-2" style={{ marginBottom: "12px" }}>
-              {product.sizes.map((size) => (
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={`w-9 h-9 text-[11px] tracking-wider border transition-all duration-200 cursor-pointer ${
-                    selectedSize === size
-                      ? "border-white bg-white text-black"
-                      : "border-white/30 text-white/70 hover:border-white"
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
+              {product.sizes.map((size) => {
+                const soldOut = sizeSoldOut(size);
+                return (
+                  <button
+                    key={size}
+                    onClick={() => !soldOut && setSelectedSize(size)}
+                    disabled={soldOut}
+                    title={soldOut ? "Taille épuisée" : undefined}
+                    className={`w-9 h-9 text-[11px] tracking-wider border transition-all duration-200 ${
+                      soldOut
+                        ? "border-white/10 text-white/20 line-through cursor-not-allowed"
+                        : selectedSize === size
+                        ? "border-white bg-white text-black cursor-pointer"
+                        : "border-white/30 text-white/70 hover:border-white cursor-pointer"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                );
+              })}
             </div>
             <button
               onClick={handleAdd}
@@ -79,7 +94,7 @@ function ProductCard({ product, delay }: { product: Product; delay: number }) {
         )}
 
         {/* Out of stock badge */}
-        {!product.inStock && (
+        {!available && (
           <div className="absolute top-4 left-4">
             <span className="text-white/50 text-[9px] tracking-[0.3em] uppercase bg-black/60 backdrop-blur-sm px-3 py-1.5 border border-white/10">
               Sold Out
@@ -100,6 +115,7 @@ function ProductCard({ product, delay }: { product: Product; delay: number }) {
 }
 
 export default function CatalogPage() {
+  const settings = useSiteSettings();
   const [products, setProducts] = useState<Product[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("all");
 
@@ -126,7 +142,7 @@ export default function CatalogPage() {
           <div className="flex items-end justify-between border-b border-white/[0.06]" style={{ paddingBottom: "20px", marginBottom: "40px" }}>
             <div>
               <h1 className="text-2xl md:text-3xl font-light tracking-[0.15em]">
-                All Products
+                {settings.catalogTitle || "All Products"}
               </h1>
             </div>
             <p className="text-white/25 text-xs tracking-wider">

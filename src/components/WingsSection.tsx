@@ -112,17 +112,17 @@ export default function WingsSection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             {
-              title: "RAVEN 🐦‍⬛",
+              title: settings.ravenTitle || "RAVEN 🐦‍⬛",
               text: settings.ravenDescription || "« Seen as a messenger between worlds, the raven is associated with transformation, mystery, and prophecy. It is a symbol of death and rebirth, linking it to the cycles of life. Ravens are frequently associated with witches due to their intelligence and dark plumage, making them ideal familiars. They are seen as conduits of wisdom and carriers of magical messages. »",
               delay: "0.5s",
             },
             {
-              title: "CROW 🐦‍⬛",
+              title: settings.crowTitle || "CROW 🐦‍⬛",
               text: settings.crowDescription || "« Crows are symbols of adaptability, cunning, and community. They are often seen as harbingers of change and transformation. The crow's connection to magic lies in its ability to mimic sounds, symbolising the blending of worlds and the power of words in spellwork. Its presence during rituals is believed to strengthen divination. Crows feature prominently in many cultures. In some Native American stories, they are considered creators or tricksters. »",
               delay: "0.65s",
             },
             {
-              title: "BLACKBIRDS 🐦‍⬛",
+              title: settings.blackbirdTitle || "BLACKBIRDS 🐦‍⬛",
               text: settings.blackbirdDescription || "« Blackbirds are linked to mystery, intuition, and the unknown. Their song is said to call to the inner self, urging introspection and spiritual awakening. A blackbird's song can be seen as a guide to other realms, useful for meditation or dream work. They are also considered guardians of secrets. In Celtic mythology, the blackbird is a guide to the Otherworld. Its melodious song is believed to open doorways between this world and the next. »",
               delay: "0.8s",
             },

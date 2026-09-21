@@ -138,6 +138,8 @@ export function generateOrderMessage(customerInfo: {
   address?: string;
   city?: string;
   country: string;
+  /** Order reference, so the WhatsApp thread maps to a row in the admin. */
+  reference?: string;
 }): string {
   const items = getCart()
     .map(
@@ -148,7 +150,11 @@ export function generateOrderMessage(customerInfo: {
 
   const total = getCartTotal().toLocaleString();
 
-  let msg = `🛒 Nouvelle commande CORBUS\n\n`;
+  let msg = `🛒 Nouvelle commande CORBUS\n`;
+  if (customerInfo.reference) {
+    msg += `Réf. ${customerInfo.reference}\n`;
+  }
+  msg += `\n`;
   msg += `👤 ${customerInfo.name}\n`;
   msg += `📞 ${customerInfo.phone}\n`;
   msg += `🌍 ${customerInfo.country}\n`;

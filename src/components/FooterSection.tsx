@@ -87,7 +87,8 @@ export default function FooterSection() {
         />
 
         <p className="text-white/10 text-[10px] tracking-wider text-center">
-          &copy; 2026 CORBUS. All rights reserved.
+          {settings.footerNote ||
+            `\u00a9 ${new Date().getFullYear()} CORBUS. All rights reserved.`}
         </p>
       </div>
     </footer>

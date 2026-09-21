@@ -25,6 +25,8 @@ export default function CartPage() {
   const country = useSyncExternalStore(subscribe, getSelectedCountry, () => DEFAULT_COUNTRY);
 
   const [step, setStep] = useState<"cart" | "checkout">("cart");
+  const [submitting, setSubmitting] = useState(false);
+  const [orderError, setOrderError] = useState("");
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -37,9 +39,45 @@ export default function CartPage() {
     setStep("checkout");
   };
 
-  const handleConfirm = () => {
-    if (!form.name || !form.phone) return;
+  const handleConfirm = async () => {
+    if (!form.name || !form.phone || submitting) return;
     if (country.requiresAddress && (!form.address || !form.city)) return;
+
+    setSubmitting(true);
+    setOrderError("");
+
+    // Record the order before handing the customer to WhatsApp, so the sale
+    // leaves a trace even if they never send the message. The window is opened
+    // synchronously first: popup blockers reject window.open after an await.
+    const tab = window.open("", "_blank");
+
+    let reference: string | undefined;
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: form.name,
+          customerPhone: form.phone,
+          address: country.requiresAddress ? form.address : "",
+          city: country.requiresAddress ? form.city : "",
+          country: country.name,
+          items: cart.map((item) => ({
+            productId: item.product.id,
+            size: item.size,
+            quantity: item.quantity,
+          })),
+        }),
+      });
+      if (res.ok) {
+        reference = (await res.json()).reference;
+      } else {
+        const body = await res.json().catch(() => ({}));
+        setOrderError(body.error || "La commande n'a pas pu être enregistrée.");
+      }
+    } catch {
+      setOrderError("La commande n'a pas pu être enregistrée.");
+    }
 
     const message = generateOrderMessage({
       name: form.name,
@@ -47,11 +85,19 @@ export default function CartPage() {
       address: country.requiresAddress ? form.address : undefined,
       city: country.requiresAddress ? form.city : undefined,
       country: country.name,
+      reference,
     });
 
     const url = getWhatsAppUrl(message, settings.whatsapp);
-    clearCart();
-    window.open(url, "_blank");
+    if (tab) {
+      tab.location.href = url;
+    } else {
+      window.location.href = url;
+    }
+    // Only empty the cart once the order is safely recorded; otherwise the
+    // customer keeps it and can retry.
+    if (reference) clearCart();
+    setSubmitting(false);
   };
 
   if (cart.length === 0 && step === "cart") {
@@ -237,19 +283,27 @@ export default function CartPage() {
               </div>
             </div>
 
+            {orderError && (
+              <p className="text-red-400/80 text-xs tracking-wide" style={{ marginBottom: "16px" }}>
+                {orderError} Ton message WhatsApp est quand même parti, tu peux
+                l&apos;envoyer tel quel.
+              </p>
+            )}
+
             <div className="flex gap-4">
               <button
                 onClick={() => setStep("cart")}
+                disabled={submitting}
                 className="flex-1 py-4 border border-white/20 text-sm tracking-[0.2em] uppercase hover:bg-white/5 transition-all cursor-pointer"
               >
                 Back
               </button>
               <button
                 onClick={handleConfirm}
-                disabled={!form.name || !form.phone || (country.requiresAddress && (!form.address || !form.city))}
+                disabled={submitting || !form.name || !form.phone || (country.requiresAddress && (!form.address || !form.city))}
                 className="flex-1 py-4 bg-white text-black text-sm tracking-[0.2em] uppercase hover:bg-white/90 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                Confirm Order
+                {submitting ? "..." : "Confirm Order"}
               </button>
             </div>
           </>
