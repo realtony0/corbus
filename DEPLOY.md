@@ -11,6 +11,39 @@ tableau de bord, le runtime est Workers).
 
 ---
 
+## Chemin le plus court (aucune commande à taper)
+
+1. **Supabase** — créer le projet, coller `supabase/schema.sql` dans l'éditeur SQL
+   (détails en §1). Récupérer l'URL du projet et la clé `service_role`.
+2. **R2** — dashboard Cloudflare → R2 → *Create bucket* → `corbus-media`, puis
+   Settings → activer l'accès public et noter l'URL obtenue.
+3. **Token** — dashboard Cloudflare → My Profile → API Tokens → *Create Token*
+   → modèle **Edit Cloudflare Workers**. Noter aussi l'Account ID (page
+   d'accueil Workers & Pages).
+4. **GitHub** — dépôt → Settings → Secrets and variables → Actions → ajouter :
+   `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `NEXT_PUBLIC_R2_PUBLIC_URL`.
+5. **Secrets du worker** — dashboard Cloudflare → Workers & Pages → `corbus` →
+   Settings → Variables and Secrets → ajouter `SUPABASE_URL`,
+   `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`
+   (et `NEXT_PUBLIC_R2_PUBLIC_URL`).
+
+À partir de là, [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
+déploie automatiquement à chaque push sur `main`. Aucun identifiant ne transite
+ailleurs que dans Cloudflare et GitHub.
+
+### Variante en ligne de commande
+
+Si tu préfères déployer depuis ta machine, remplis `.env.local` puis :
+
+```bash
+npx wrangler login          # ouvre le navigateur
+bash scripts/setup-cloudflare.sh
+```
+
+Le script crée le bucket, envoie les quatre secrets au worker et déploie.
+
+---
+
 ## 1. Supabase
 
 1. Créer un projet sur [supabase.com](https://supabase.com).
