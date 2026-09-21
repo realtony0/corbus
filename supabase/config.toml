@@ -1,0 +1,3 @@
+# Minimal config so the Supabase GitHub integration picks up this project and
+# applies everything under supabase/migrations/ on push.
+project_id = "yapaccxbqgznbbtagoil"

@@ -13,7 +13,7 @@ tableau de bord, le runtime est Workers).
 
 ## Chemin le plus court (aucune commande à taper)
 
-1. **Supabase** — créer le projet, coller `supabase/schema.sql` dans l'éditeur SQL
+1. **Supabase** — créer le projet, appliquer le schéma (voir [`supabase/README.md`](supabase/README.md))
    (détails en §1). Récupérer l'URL du projet et la clé `service_role`.
 2. **R2** — dashboard Cloudflare → R2 → *Create bucket* → `corbus-media`, puis
    Settings → activer l'accès public et noter l'URL obtenue.
@@ -48,7 +48,7 @@ Le script crée le bucket, envoie les quatre secrets au worker et déploie.
 
 1. Créer un projet sur [supabase.com](https://supabase.com).
 2. Dashboard → **SQL Editor** → **New query** → coller tout
-   [`supabase/schema.sql`](supabase/schema.sql) → **Run**.
+   [`supabase/migrations/20260921000000_init.sql`](supabase/migrations/20260921000000_init.sql) → **Run**.
    Le script crée les tables `products` et `site_content`, active RLS et insère
    les 3 produits + la galerie par défaut. Il est ré-exécutable sans risque.
 3. Récupérer dans **Project Settings** :
