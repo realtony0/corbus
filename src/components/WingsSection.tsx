@@ -98,10 +98,6 @@ export default function WingsSection() {
             The Corbus Collection represents the revolt of man&apos;s soul in a
             corrupted, cruel, and fake society we&apos;re all living in.
           </p>
-          <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center" style={{ marginBottom: "24px" }}>
-            Inspired by the crow, a symbol of mystery, intelligence and freedom,
-            Corbus invites you to express your unique and rebellious personality.
-          </p>
           <p className="text-white/70 text-sm md:text-[15px] leading-[2] text-center">
             The surname Corbus is a name for a person who is raven-haired or
             dark-complexioned. The surname Corvi is derived from the Italian
