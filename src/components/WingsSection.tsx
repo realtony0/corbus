@@ -108,7 +108,7 @@ export default function WingsSection() {
             word &laquo;&nbsp;corvo&nbsp;&raquo; which comes from the Latin
             &laquo;&nbsp;corvus&nbsp;&raquo; which means raven or crow.
             Furthermore, this nickname surname was often used to describe
-            priests 👁️
+            priests.
           </p>
         </div>
 
@@ -126,7 +126,7 @@ export default function WingsSection() {
               delay: "0.65s",
             },
             {
-              title: "BLACKBIRDS 🐦‍⬛👁️",
+              title: "BLACKBIRDS 🐦‍⬛",
               text: settings.blackbirdDescription || "« Blackbirds are linked to mystery, intuition, and the unknown. Their song is said to call to the inner self, urging introspection and spiritual awakening. A blackbird's song can be seen as a guide to other realms, useful for meditation or dream work. They are also considered guardians of secrets. In Celtic mythology, the blackbird is a guide to the Otherworld. Its melodious song is believed to open doorways between this world and the next. »",
               delay: "0.8s",
             },
