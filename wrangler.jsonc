@@ -12,6 +12,10 @@
   "observability": {
     "enabled": true
   },
+  // Declaring routes turns the workers.dev URL off by default. Keep it on:
+  // it is the fallback while DNS propagates and a way in if the custom
+  // domain ever misbehaves.
+  "workers_dev": true,
   // Custom domains. These require corbus.shop to be an ACTIVE zone on this
   // Cloudflare account (Add a site + nameservers pointed at Cloudflare from
   // IONOS). A deploy fails until the zone is active.
