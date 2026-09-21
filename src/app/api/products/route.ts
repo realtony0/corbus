@@ -5,7 +5,9 @@ import {
   updateProduct,
   deleteProduct,
 } from "@/lib/products";
+import { isAuthenticated } from "@/lib/auth";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -13,31 +15,68 @@ const NO_CACHE = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
 };
 
+function unauthorized() {
+  return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+}
+
+function failed(error: unknown) {
+  console.error("products route:", error);
+  return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+}
+
 export async function GET() {
-  return NextResponse.json(await getProducts(), { headers: NO_CACHE });
+  try {
+    return NextResponse.json(await getProducts(), { headers: NO_CACHE });
+  } catch (error) {
+    return failed(error);
+  }
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const product = await addProduct(body);
-  return NextResponse.json(product, { status: 201 });
+  if (!(await isAuthenticated(request))) return unauthorized();
+  try {
+    const body = await request.json();
+    if (!body?.name || typeof body.price !== "number") {
+      return NextResponse.json(
+        { error: "name et price sont requis" },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(await addProduct(body), { status: 201 });
+  } catch (error) {
+    return failed(error);
+  }
 }
 
 export async function PUT(request: NextRequest) {
-  const body = await request.json();
-  const { id, ...updates } = body;
-  const product = await updateProduct(id, updates);
-  if (!product) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!(await isAuthenticated(request))) return unauthorized();
+  try {
+    const { id, ...updates } = await request.json();
+    if (!id) {
+      return NextResponse.json({ error: "id est requis" }, { status: 400 });
+    }
+    const product = await updateProduct(id, updates);
+    if (!product) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json(product);
+  } catch (error) {
+    return failed(error);
   }
-  return NextResponse.json(product);
 }
 
 export async function DELETE(request: NextRequest) {
-  const body = await request.json();
-  const success = await deleteProduct(body.id);
-  if (!success) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!(await isAuthenticated(request))) return unauthorized();
+  try {
+    const { id } = await request.json();
+    if (!id) {
+      return NextResponse.json({ error: "id est requis" }, { status: 400 });
+    }
+    if (!(await deleteProduct(id))) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return failed(error);
   }
-  return NextResponse.json({ success: true });
 }

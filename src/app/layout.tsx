@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import LayoutWrapper from "@/components/LayoutWrapper";
+import SiteSettingsProvider from "@/components/SiteSettingsProvider";
+import { getSiteSettings } from "@/lib/siteContent";
+
+// Settings are read per request, so editing them in /admin takes effect
+// straight away. Without this the pages are prerendered at build time and
+// would keep whatever settings existed at deploy.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "CORBUS — For All The Black Birds",
@@ -9,11 +16,16 @@ export const metadata: Metadata = {
   keywords: ["Corbus", "streetwear", "fashion", "crow", "raven", "Senegal"],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Settings come from Supabase and are rendered on the server, so every
+  // visitor sees what the admin saved — they used to live in the admin's own
+  // localStorage and never left that browser.
+  const settings = await getSiteSettings();
+
   return (
     <html lang="en">
       <head>
@@ -29,7 +41,9 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <LayoutWrapper>{children}</LayoutWrapper>
+        <SiteSettingsProvider settings={settings}>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </SiteSettingsProvider>
       </body>
     </html>
   );

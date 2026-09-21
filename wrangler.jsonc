@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "corbus",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-21",
+  // nodejs_compat is required by @opennextjs/cloudflare.
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  // Product and gallery images uploaded from /admin.
+  // Create it with: npx wrangler r2 bucket create corbus-media
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "corbus-media",
+      "preview_bucket_name": "corbus-media"
+    }
+  ]
+}

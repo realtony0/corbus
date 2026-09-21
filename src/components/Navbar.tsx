@@ -10,11 +10,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  const cartCount = useSyncExternalStore(
-    subscribe,
-    () => getCartCount(),
-    () => 0
-  );
+  const cartCount = useSyncExternalStore(subscribe, getCartCount, () => 0);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);

@@ -13,13 +13,16 @@ import {
   generateOrderMessage,
   getWhatsAppUrl,
   getSelectedCountry,
+  EMPTY_CART,
+  DEFAULT_COUNTRY,
 } from "@/lib/store";
-import { countries } from "@/lib/countries";
+import { useSiteSettings } from "@/lib/useSiteSettings";
 
 export default function CartPage() {
-  const cart = useSyncExternalStore(subscribe, () => getCart(), () => []);
-  const total = useSyncExternalStore(subscribe, () => getCartTotal(), () => 0);
-  const country = useSyncExternalStore(subscribe, () => getSelectedCountry(), () => countries[0]);
+  const settings = useSiteSettings();
+  const cart = useSyncExternalStore(subscribe, getCart, () => EMPTY_CART);
+  const total = useSyncExternalStore(subscribe, getCartTotal, () => 0);
+  const country = useSyncExternalStore(subscribe, getSelectedCountry, () => DEFAULT_COUNTRY);
 
   const [step, setStep] = useState<"cart" | "checkout">("cart");
   const [form, setForm] = useState({
@@ -46,7 +49,7 @@ export default function CartPage() {
       country: country.name,
     });
 
-    const url = getWhatsAppUrl(message);
+    const url = getWhatsAppUrl(message, settings.whatsapp);
     clearCart();
     window.open(url, "_blank");
   };

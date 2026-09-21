@@ -4,12 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Product } from "@/lib/types";
 import { updateSiteSettings, DEFAULT_SITE_SETTINGS, SiteSettings } from "@/lib/siteSettings";
 
-const ADMIN_PASSWORD_KEY = "corbus_admin_password";
-const GALLERY_KEY = "corbus_gallery_photos";
-const SETTINGS_KEY = "corbus_site_settings";
-
-const DEFAULT_PASSWORD = "corbus2024";
-
 const DEFAULT_GALLERY = [
   "/images/gallery/hero.jpg",
   "/images/gallery/photo1.jpg",
@@ -36,8 +30,7 @@ export default function AdminPage() {
   const [newGalleryUrl, setNewGalleryUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({ current: "", newPass: "", confirm: "" });
-  const [passwordMsg, setPasswordMsg] = useState("");
+  const [checkingSession, setCheckingSession] = useState(true);
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -48,43 +41,83 @@ export default function AdminPage() {
     inStock: true,
   });
 
+  // An expired session used to make every button fail silently.
+  const apiWrite = useCallback(
+    async (url: string, method: string, body?: unknown) => {
+      const res = await fetch(url, {
+        method,
+        headers: body === undefined ? undefined : { "Content-Type": "application/json" },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      }).catch(() => null);
+      if (res && res.status === 401) {
+        setAuthenticated(false);
+        return null;
+      }
+      return res;
+    },
+    []
+  );
+
   const fetchProducts = useCallback(async () => {
     try {
-      const res = await fetch("/api/products");
-      const data = await res.json();
-      setProducts(data);
+      const res = await fetch("/api/products", { cache: "no-store" });
+      if (res.ok) setProducts(await res.json());
     } catch {}
   }, []);
 
+  // Restore an existing session so a reload does not log the admin out.
   useEffect(() => {
-    if (authenticated) {
-      fetchProducts();
-      const savedGallery = localStorage.getItem(GALLERY_KEY);
-      if (savedGallery) setGallery(JSON.parse(savedGallery));
-      const savedSettings = localStorage.getItem(SETTINGS_KEY);
-      if (savedSettings) setSettings(JSON.parse(savedSettings));
-    }
+    fetch("/api/admin/session", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { authenticated?: boolean }) => setAuthenticated(Boolean(d.authenticated)))
+      .catch(() => {})
+      .finally(() => setCheckingSession(false));
+  }, []);
+
+  // Gallery and settings live in Supabase, not in this browser's localStorage.
+  useEffect(() => {
+    if (!authenticated) return;
+    fetchProducts();
+    fetch("/api/gallery", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: string[]) => Array.isArray(d) && setGallery(d))
+      .catch(() => {});
+    fetch("/api/settings", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: SiteSettings) => setSettings({ ...DEFAULT_SETTINGS, ...d }))
+      .catch(() => {});
   }, [authenticated, fetchProducts]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const savedPass = localStorage.getItem(ADMIN_PASSWORD_KEY) || DEFAULT_PASSWORD;
-    if (password === savedPass) {
-      setAuthenticated(true);
-      setLoginError(false);
-    } else {
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      if (res.ok) {
+        setAuthenticated(true);
+        setLoginError(false);
+        setPassword("");
+      } else {
+        setLoginError(true);
+      }
+    } catch {
       setLoginError(true);
     }
+  };
+
+  const handleLogout = async () => {
+    await fetch("/api/admin/login", { method: "DELETE" }).catch(() => {});
+    setAuthenticated(false);
   };
 
   const handleSave = async () => {
     const method = editing ? "PUT" : "POST";
     const body = editing ? { ...form, id: editing.id } : form;
-    await fetch("/api/products", {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
+    const res = await apiWrite("/api/products", method, body);
+    if (!res || !res.ok) return;
     setShowForm(false);
     setEditing(null);
     setForm({ name: "", description: "", price: 0, images: [""], sizes: ["S", "M", "L", "XL"], category: "T-shirts", inStock: true });
@@ -93,11 +126,7 @@ export default function AdminPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Supprimer ce produit ?")) return;
-    await fetch("/api/products", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
+    await apiWrite("/api/products", "DELETE", { id });
     fetchProducts();
   };
 
@@ -116,17 +145,16 @@ export default function AdminPage() {
   };
 
   const handleToggleStock = async (product: Product) => {
-    await fetch("/api/products", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: product.id, inStock: !product.inStock }),
+    await apiWrite("/api/products", "PUT", {
+      id: product.id,
+      inStock: !product.inStock,
     });
     fetchProducts();
   };
 
-  const saveGallery = (photos: string[]) => {
+  const saveGallery = async (photos: string[]) => {
     setGallery(photos);
-    localStorage.setItem(GALLERY_KEY, JSON.stringify(photos));
+    await apiWrite("/api/gallery", "PUT", photos);
   };
 
   const uploadFile = async (file: File, folder: string): Promise<string | null> => {
@@ -136,44 +164,41 @@ export default function AdminPage() {
       formData.append("file", file);
       formData.append("folder", folder);
       const res = await fetch("/api/upload", { method: "POST", body: formData });
+      if (res.status === 401) {
+        setAuthenticated(false);
+        return null;
+      }
       const data = await res.json();
       if (data.path) return data.path;
+      alert(data.error || "Échec de l'upload");
       return null;
     } catch {
+      alert("Échec de l'upload");
       return null;
     } finally {
       setUploading(false);
     }
   };
 
-  const saveSettings = () => {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  const saveSettings = async () => {
+    const res = await apiWrite("/api/settings", "PUT", settings);
+    if (!res || !res.ok) return;
+    // Reflect the change in this tab straight away; other visitors get it
+    // from the server on their next page load.
     updateSiteSettings(settings);
     setSettingsSaved(true);
     setTimeout(() => setSettingsSaved(false), 2000);
   };
 
-  const changePassword = () => {
-    const savedPass = localStorage.getItem(ADMIN_PASSWORD_KEY) || DEFAULT_PASSWORD;
-    if (passwordForm.current !== savedPass) {
-      setPasswordMsg("Mot de passe actuel incorrect");
-      return;
-    }
-    if (passwordForm.newPass.length < 6) {
-      setPasswordMsg("6 caractères minimum");
-      return;
-    }
-    if (passwordForm.newPass !== passwordForm.confirm) {
-      setPasswordMsg("Les mots de passe ne correspondent pas");
-      return;
-    }
-    localStorage.setItem(ADMIN_PASSWORD_KEY, passwordForm.newPass);
-    setPasswordForm({ current: "", newPass: "", confirm: "" });
-    setPasswordMsg("Mot de passe modifié !");
-    setTimeout(() => setPasswordMsg(""), 3000);
-  };
-
   // ─── LOGIN ──────────────────────────────────────────────────────
+  if (checkingSession) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, -apple-system, sans-serif", color: "#aaa", fontSize: 13 }}>
+        Chargement…
+      </div>
+    );
+  }
+
   if (!authenticated) {
     return (
       <div style={{ minHeight: "100vh", background: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, -apple-system, sans-serif" }}>
@@ -831,40 +856,19 @@ export default function AdminPage() {
 
               {/* Password */}
               <div style={{ ...s.card, marginBottom: 24 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 600, margin: "0 0 20px" }}>Changer le mot de passe</h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  <div>
-                    <label style={s.label}>Mot de passe actuel</label>
-                    <input
-                      type="password"
-                      value={passwordForm.current}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
-                      style={s.input}
-                    />
-                  </div>
-                  <div>
-                    <label style={s.label}>Nouveau mot de passe</label>
-                    <input
-                      type="password"
-                      value={passwordForm.newPass}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, newPass: e.target.value })}
-                      style={s.input}
-                    />
-                  </div>
-                  <div>
-                    <label style={s.label}>Confirmer</label>
-                    <input
-                      type="password"
-                      value={passwordForm.confirm}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
-                      style={s.input}
-                    />
-                  </div>
-                  {passwordMsg && <p style={{ fontSize: 13, color: passwordMsg.includes("modifié") ? "#16a34a" : "#dc2626", margin: 0 }}>{passwordMsg}</p>}
-                  <button onClick={changePassword} style={{ ...s.btn, background: "#111", color: "#fff", alignSelf: "flex-start" }}>
-                    Modifier le mot de passe
-                  </button>
-                </div>
+                <h3 style={{ fontSize: 15, fontWeight: 600, margin: "0 0 8px" }}>Mot de passe</h3>
+                <p style={{ fontSize: 13, color: "#888", margin: "0 0 16px", lineHeight: 1.6 }}>
+                  Le mot de passe est maintenant vérifié côté serveur et stocké dans la
+                  variable d&apos;environnement <code>ADMIN_PASSWORD</code>. Pour le changer,
+                  modifie-la dans Cloudflare (Workers &amp; Pages → Settings → Variables and
+                  Secrets) puis redéploie.
+                </p>
+                <button
+                  onClick={handleLogout}
+                  style={{ ...s.btn, background: "#f5f5f5", color: "#111", alignSelf: "flex-start" }}
+                >
+                  Se déconnecter
+                </button>
               </div>
 
               {/* Danger zone */}
@@ -872,14 +876,15 @@ export default function AdminPage() {
                 <h3 style={{ fontSize: 15, fontWeight: 600, margin: "0 0 8px", color: "#dc2626" }}>Zone dangereuse</h3>
                 <p style={{ fontSize: 13, color: "#888", margin: "0 0 16px" }}>Réinitialiser tous les paramètres aux valeurs par défaut</p>
                 <button
-                  onClick={() => {
-                    if (confirm("Réinitialiser tous les paramètres ?")) {
-                      localStorage.removeItem(GALLERY_KEY);
-                      localStorage.removeItem(SETTINGS_KEY);
-                      localStorage.removeItem(ADMIN_PASSWORD_KEY);
-                      setGallery(DEFAULT_GALLERY);
-                      setSettings(DEFAULT_SETTINGS);
-                    }
+                  onClick={async () => {
+                    if (!confirm("Réinitialiser tous les paramètres ?")) return;
+                    setGallery(DEFAULT_GALLERY);
+                    setSettings(DEFAULT_SETTINGS);
+                    await Promise.all([
+                      apiWrite("/api/gallery", "PUT", DEFAULT_GALLERY),
+                      apiWrite("/api/settings", "PUT", DEFAULT_SETTINGS),
+                    ]);
+                    updateSiteSettings(DEFAULT_SETTINGS);
                   }}
                   style={{ ...s.btn, background: "#fef2f2", color: "#dc2626" }}
                 >

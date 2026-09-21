@@ -1,6 +1,7 @@
-"use client";
-
-const SETTINGS_KEY = "corbus_site_settings";
+// No "use client" directive on purpose: the server (root layout, API routes)
+// imports SiteSettings / DEFAULT_SITE_SETTINGS from here. Marking the module
+// client-only would hand the server a client-reference proxy instead of the
+// real values, and the defaults would come back empty.
 
 export interface SiteSettings {
   // Contact
@@ -42,59 +43,38 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   crowDescription: "",
   blackbirdDescription: "",
   originText: "",
-  loadingDuration: 3000,
+  loadingDuration: 1400,
   bodyFont: "Inter",
   headingFont: "Cormorant Garamond",
   gothicFont: "UnifrakturCook",
 };
 
-let settings: SiteSettings = { ...DEFAULT_SITE_SETTINGS };
+/** Merge a partial document coming from the database over the defaults. */
+export function mergeSiteSettings(raw: unknown): SiteSettings {
+  if (!raw || typeof raw !== "object") return { ...DEFAULT_SITE_SETTINGS };
+  return { ...DEFAULT_SITE_SETTINGS, ...(raw as Partial<SiteSettings>) };
+}
+
+/**
+ * Settings live in Supabase and are rendered on the server, so the source of
+ * truth reaches every visitor. This client store only holds an *override*:
+ * it stays null until the admin saves in this tab, which lets the panel show
+ * its change immediately without a reload. Keeping it null during hydration
+ * is what makes the client's first snapshot match the server's.
+ */
+let override: SiteSettings | null = null;
 let listeners: (() => void)[] = [];
-let initialized = false;
 
 function notify() {
   listeners.forEach((l) => l());
 }
 
-function init() {
-  if (initialized) return;
-  if (typeof window === "undefined") return;
-  initialized = true;
-  try {
-    const saved = localStorage.getItem(SETTINGS_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      settings = { ...DEFAULT_SITE_SETTINGS, ...parsed };
-    }
-  } catch {
-    // ignore parse errors
-  }
+export function getSiteSettingsOverride(): SiteSettings | null {
+  return override;
 }
 
-export function getSiteSettings(): SiteSettings {
-  init();
-  return settings;
-}
-
-export function getSetting<K extends keyof SiteSettings>(key: K): SiteSettings[K] {
-  init();
-  return settings[key];
-}
-
-export function updateSiteSettings(partial: Partial<SiteSettings>) {
-  init();
-  settings = { ...settings, ...partial };
-  if (typeof window !== "undefined") {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-  }
-  notify();
-}
-
-export function resetSiteSettings() {
-  settings = { ...DEFAULT_SITE_SETTINGS };
-  if (typeof window !== "undefined") {
-    localStorage.removeItem(SETTINGS_KEY);
-  }
+export function updateSiteSettings(next: SiteSettings) {
+  override = { ...next };
   notify();
 }
 
