@@ -1,0 +1,35 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "corbus",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-21",
+  // nodejs_compat is required by @opennextjs/cloudflare.
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  // Declaring routes turns the workers.dev URL off by default. Keep it on:
+  // it is the fallback while DNS propagates and a way in if the custom
+  // domain ever misbehaves.
+  "workers_dev": true,
+  // Custom domains. These require corbus.shop to be an ACTIVE zone on this
+  // Cloudflare account (Add a site + nameservers pointed at Cloudflare from
+  // IONOS). A deploy fails until the zone is active.
+  "routes": [
+    { "pattern": "corbus.shop", "custom_domain": true },
+    { "pattern": "www.corbus.shop", "custom_domain": true }
+  ],
+  // Product and gallery images uploaded from /admin.
+  // Create it with: npx wrangler r2 bucket create corbus-media
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "corbus-media",
+      "preview_bucket_name": "corbus-media"
+    }
+  ]
+}

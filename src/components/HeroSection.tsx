@@ -14,9 +14,14 @@ export default function HeroSection() {
   }, []);
 
   useEffect(() => {
-    setTimeout(() => setLoaded(true), 2200);
+    // Reveal as soon as the hero is mounted — the old 2.2s timer left a black
+    // screen long after the page was ready.
+    const timer = setTimeout(() => setLoaded(true), 50);
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, [handleScroll]);
 
   const parallax = scrollY * 0.4;

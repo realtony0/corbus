@@ -4,15 +4,31 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSiteSettings } from "@/lib/useSiteSettings";
 
+const SEEN_KEY = "corbus_intro_seen";
+
 export default function LoadingScreen() {
   const settings = useSiteSettings();
   const [visible, setVisible] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
-    const duration = settings.loadingDuration || 3000;
-    const timer1 = setTimeout(() => setFadeOut(true), duration - 1000);
-    const timer2 = setTimeout(() => setVisible(false), duration - 200);
+    // The intro used to replay in full on every reload, which read as the
+    // site being frozen. Show it once per browser session.
+    let seen = false;
+    try {
+      seen = sessionStorage.getItem(SEEN_KEY) === "1";
+      sessionStorage.setItem(SEEN_KEY, "1");
+    } catch {
+      // private mode — fall back to showing the intro
+    }
+    if (seen) {
+      setVisible(false);
+      return;
+    }
+
+    const duration = Math.max(600, settings.loadingDuration || 1400);
+    const timer1 = setTimeout(() => setFadeOut(true), duration * 0.55);
+    const timer2 = setTimeout(() => setVisible(false), duration);
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
@@ -59,7 +75,7 @@ export default function LoadingScreen() {
         <div
           className="h-full bg-white/50 rounded-full"
           style={{
-            animation: "loadBar 1.8s ease-in-out forwards",
+            animation: "loadBar 1.2s ease-in-out forwards",
           }}
         />
       </div>

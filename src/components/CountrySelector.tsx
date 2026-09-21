@@ -2,7 +2,12 @@
 
 import { useState, useRef, useEffect, useSyncExternalStore } from "react";
 import { countries } from "@/lib/countries";
-import { getSelectedCountry, setSelectedCountry, subscribe } from "@/lib/store";
+import {
+  getSelectedCountry,
+  setSelectedCountry,
+  subscribe,
+  DEFAULT_COUNTRY,
+} from "@/lib/store";
 
 export default function CountrySelector() {
   const [open, setOpen] = useState(false);
@@ -12,8 +17,8 @@ export default function CountrySelector() {
 
   const country = useSyncExternalStore(
     subscribe,
-    () => getSelectedCountry(),
-    () => countries[0]
+    getSelectedCountry,
+    () => DEFAULT_COUNTRY
   );
 
   useEffect(() => {

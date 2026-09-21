@@ -2,18 +2,61 @@
 
 import { CartItem, Product, Country } from "./types";
 import { countries } from "./countries";
-import { getSetting } from "./siteSettings";
 
-// Simple state management
-let cart: CartItem[] = [];
-let selectedCountry: Country = countries[0]; // Sénégal by default
+/**
+ * Cart + country state.
+ *
+ * Both are persisted to localStorage: the cart used to live in a plain module
+ * variable, so it was wiped by every full page reload.
+ */
+const CART_KEY = "corbus_cart";
+const COUNTRY_KEY = "corbus_country";
+
+/** Stable references, so useSyncExternalStore's server snapshot is cached. */
+export const EMPTY_CART: CartItem[] = [];
+export const DEFAULT_COUNTRY: Country = countries[0]; // Sénégal
+
+let cart: CartItem[] = EMPTY_CART;
+let selectedCountry: Country = DEFAULT_COUNTRY;
 let listeners: (() => void)[] = [];
+let loaded = false;
+
+function load() {
+  if (loaded || typeof window === "undefined") return;
+  loaded = true;
+  try {
+    const rawCart = localStorage.getItem(CART_KEY);
+    if (rawCart) {
+      const parsed = JSON.parse(rawCart);
+      if (Array.isArray(parsed)) cart = parsed as CartItem[];
+    }
+    const rawCountry = localStorage.getItem(COUNTRY_KEY);
+    if (rawCountry) {
+      const match = countries.find((c) => c.code === rawCountry);
+      if (match) selectedCountry = match;
+    }
+  } catch {
+    // corrupt storage — fall back to an empty cart
+  }
+}
+
+function persist() {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    localStorage.setItem(COUNTRY_KEY, selectedCountry.code);
+  } catch {
+    // quota or private mode — state still works for this page view
+  }
+}
 
 function notify() {
+  persist();
   listeners.forEach((l) => l());
 }
 
 export function subscribe(listener: () => void) {
+  load();
   listeners.push(listener);
   return () => {
     listeners = listeners.filter((l) => l !== listener);
@@ -21,23 +64,27 @@ export function subscribe(listener: () => void) {
 }
 
 export function getCart(): CartItem[] {
+  load();
   return cart;
 }
 
 export function addToCart(product: Product, size: string) {
+  load();
   const existing = cart.find(
     (item) => item.product.id === product.id && item.size === size
   );
   if (existing) {
-    existing.quantity += 1;
+    cart = cart.map((item) =>
+      item === existing ? { ...item, quantity: item.quantity + 1 } : item
+    );
   } else {
-    cart.push({ product, size, quantity: 1 });
+    cart = [...cart, { product, size, quantity: 1 }];
   }
-  cart = [...cart];
   notify();
 }
 
 export function removeFromCart(productId: string, size: string) {
+  load();
   cart = cart.filter(
     (item) => !(item.product.id === productId && item.size === size)
   );
@@ -45,18 +92,17 @@ export function removeFromCart(productId: string, size: string) {
 }
 
 export function updateQuantity(productId: string, size: string, quantity: number) {
+  load();
   if (quantity <= 0) {
     removeFromCart(productId, size);
     return;
   }
-  const item = cart.find(
-    (i) => i.product.id === productId && i.size === size
+  cart = cart.map((item) =>
+    item.product.id === productId && item.size === size
+      ? { ...item, quantity }
+      : item
   );
-  if (item) {
-    item.quantity = quantity;
-    cart = [...cart];
-    notify();
-  }
+  notify();
 }
 
 export function clearCart() {
@@ -65,18 +111,23 @@ export function clearCart() {
 }
 
 export function getCartTotal(): number {
-  return cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  return getCart().reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0
+  );
 }
 
 export function getCartCount(): number {
-  return cart.reduce((sum, item) => sum + item.quantity, 0);
+  return getCart().reduce((sum, item) => sum + item.quantity, 0);
 }
 
 export function getSelectedCountry(): Country {
+  load();
   return selectedCountry;
 }
 
 export function setSelectedCountry(country: Country) {
+  load();
   selectedCountry = country;
   notify();
 }
@@ -88,7 +139,7 @@ export function generateOrderMessage(customerInfo: {
   city?: string;
   country: string;
 }): string {
-  const items = cart
+  const items = getCart()
     .map(
       (item) =>
         `• ${item.product.name} (${item.size}) x${item.quantity} — ${item.product.price.toLocaleString()} FCFA`
@@ -110,7 +161,12 @@ export function generateOrderMessage(customerInfo: {
   return msg;
 }
 
-export function getWhatsAppUrl(message: string, phone?: string): string {
-  const whatsappNumber = phone || getSetting("whatsapp");
-  return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+/**
+ * The WhatsApp number is a site setting, so it has to be passed in by a
+ * component reading useSiteSettings() — this module can no longer reach into
+ * the settings store now that settings are server-rendered.
+ */
+export function getWhatsAppUrl(message: string, phone: string): string {
+  const number = phone.replace(/\D/g, "");
+  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 }
