@@ -32,6 +32,11 @@ export interface SiteSettings {
   galleryTitle: string;
   gallerySubtitle: string;
   footerNote: string;
+  // Currency
+  /** ISO code stored on products and orders, e.g. CAD. */
+  currencyCode: string;
+  /** What visitors see next to an amount, e.g. "$ CA". */
+  currencyLabel: string;
   // Appearance
   loadingDuration: number;
   bodyFont: string;
@@ -64,6 +69,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   galleryTitle: "Gallery",
   gallerySubtitle: "The Corbus Collective",
   footerNote: "",
+  currencyCode: "CAD",
+  currencyLabel: "$ CA",
   loadingDuration: 1400,
   bodyFont: "Inter",
   headingFont: "Cormorant Garamond",

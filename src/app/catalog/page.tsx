@@ -1,13 +1,29 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { Product } from "@/lib/types";
-import { addToCart } from "@/lib/store";
+import { addToCart, DEFAULT_COUNTRY } from "@/lib/store";
 import { useSiteSettings } from "@/lib/useSiteSettings";
+import { convertPrice, useRates, RateTable } from "@/lib/money";
+import { getSelectedCountry, subscribe } from "@/lib/store";
+import { Country } from "@/lib/types";
 import FooterSection from "@/components/FooterSection";
 
-function ProductCard({ product, delay }: { product: Product; delay: number }) {
+function ProductCard({
+  product,
+  delay,
+  currencyLabel,
+  country,
+  rates,
+}: {
+  product: Product;
+  delay: number;
+  currencyLabel: string;
+  country: Country;
+  rates: RateTable | null;
+}) {
+  const price = convertPrice(product.price, currencyLabel, country, rates);
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [added, setAdded] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -108,14 +124,21 @@ function ProductCard({ product, delay }: { product: Product; delay: number }) {
         {product.name}
       </h3>
       <p className="text-[13px] text-white/35 font-light tracking-wider">
-        {product.price.toLocaleString()} FCFA
+        {price.base}
       </p>
+      {price.converted && (
+        <p className="text-[11px] text-white/20 font-light tracking-wider" style={{ marginTop: "2px" }}>
+          ≈ {price.converted}
+        </p>
+      )}
     </div>
   );
 }
 
 export default function CatalogPage() {
   const settings = useSiteSettings();
+  const rates = useRates();
+  const country = useSyncExternalStore(subscribe, getSelectedCountry, () => DEFAULT_COUNTRY);
   const [products, setProducts] = useState<Product[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("all");
 
@@ -185,7 +208,14 @@ export default function CatalogPage() {
             style={{ gap: "30px 16px" }}
           >
             {filtered.map((product, i) => (
-              <ProductCard key={product.id} product={product} delay={i * 150} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                delay={i * 150}
+                currencyLabel={settings.currencyLabel}
+                country={country}
+                rates={rates}
+              />
             ))}
           </div>
 

@@ -1,5 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from "./supabase";
 import { Product } from "./types";
+import { getSiteSettings } from "./siteContent";
 
 interface ProductRow {
   id: string;
@@ -98,7 +99,8 @@ export async function addProduct(
       name: product.name,
       description: product.description ?? "",
       price: product.price,
-      currency: product.currency || "XOF",
+      // New products follow the shop currency set in /admin.
+      currency: product.currency || (await getSiteSettings()).currencyCode,
       images: product.images ?? [],
       sizes: product.sizes ?? [],
       category: product.category ?? "",

@@ -140,11 +140,15 @@ export function generateOrderMessage(customerInfo: {
   country: string;
   /** Order reference, so the WhatsApp thread maps to a row in the admin. */
   reference?: string;
+  /** Shop currency label; the message used to hardcode FCFA. */
+  currencyLabel: string;
+  /** Local equivalent of the total, when the buyer's currency differs. */
+  convertedTotal?: string | null;
 }): string {
   const items = getCart()
     .map(
       (item) =>
-        `• ${item.product.name} (${item.size}) x${item.quantity} — ${item.product.price.toLocaleString()} FCFA`
+        `• ${item.product.name} (${item.size}) x${item.quantity} — ${item.product.price.toLocaleString("fr-FR")} ${customerInfo.currencyLabel}`
     )
     .join("\n");
 
@@ -162,7 +166,10 @@ export function generateOrderMessage(customerInfo: {
     msg += `📍 ${customerInfo.address}, ${customerInfo.city}\n`;
   }
   msg += `\n📦 Articles:\n${items}\n\n`;
-  msg += `💰 Total: ${total} FCFA`;
+  msg += `💰 Total: ${total} ${customerInfo.currencyLabel}`;
+  if (customerInfo.convertedTotal) {
+    msg += `\n(≈ ${customerInfo.convertedTotal})`;
+  }
 
   return msg;
 }

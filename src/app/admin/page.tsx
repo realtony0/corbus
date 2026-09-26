@@ -510,7 +510,7 @@ export default function AdminPage() {
                             <span style={{ fontSize: 13, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
                           </div>
                         </td>
-                        <td style={{ padding: "12px 8px", fontSize: 13, color: "#666" }}>{p.price.toLocaleString()} FCFA</td>
+                        <td style={{ padding: "12px 8px", fontSize: 13, color: "#666" }}>{p.price.toLocaleString("fr-FR")} {settings.currencyLabel}</td>
                         <td style={{ padding: "12px 8px", fontSize: 12, color: "#888" }}>{p.category}</td>
                         <td style={{ padding: "12px 0 12px 8px", textAlign: "right" }}>
                           <span style={s.badge(p.inStock)}>{p.inStock ? "En stock" : "Épuisé"}</span>
@@ -550,7 +550,7 @@ export default function AdminPage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <h3 style={{ fontSize: 14, fontWeight: 600, margin: "0 0 4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</h3>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: "#333" }}>{p.price.toLocaleString()} FCFA</span>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: "#333" }}>{p.price.toLocaleString("fr-FR")} {settings.currencyLabel}</span>
                           <span style={{ fontSize: 12, color: "#999" }}>{p.category}</span>
                           <span style={s.badge(p.inStock)}>{p.inStock ? "En stock" : "Épuisé"}</span>
                         </div>
@@ -878,6 +878,33 @@ export default function AdminPage() {
                       style={s.input}
                     />
                   </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    <div>
+                      <label style={s.label}>Devise affichée</label>
+                      <input
+                        type="text"
+                        value={settings.currencyLabel}
+                        onChange={(e) => setSettings({ ...settings, currencyLabel: e.target.value })}
+                        placeholder="$ CA"
+                        style={s.input}
+                      />
+                    </div>
+                    <div>
+                      <label style={s.label}>Code devise (ISO)</label>
+                      <input
+                        type="text"
+                        value={settings.currencyCode}
+                        onChange={(e) => setSettings({ ...settings, currencyCode: e.target.value.toUpperCase() })}
+                        placeholder="CAD"
+                        style={s.input}
+                      />
+                    </div>
+                  </div>
+                  <p style={{ fontSize: 12, color: "#999", margin: "-6px 0 0" }}>
+                    La devise affichée apparaît à côté de chaque prix. Le code ISO est
+                    enregistré sur les nouveaux produits et les commandes. Changer ces
+                    champs ne convertit aucun montant existant.
+                  </p>
                   <div>
                     <label style={s.label}>Titre carte RAVEN</label>
                     <input
@@ -1150,7 +1177,7 @@ export default function AdminPage() {
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
-                  <label style={s.label}>Prix (FCFA)</label>
+                  <label style={s.label}>Prix ({settings.currencyLabel})</label>
                   <input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} style={s.input} />
                 </div>
                 <div>

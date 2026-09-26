@@ -2,6 +2,7 @@ import { getSupabase, isSupabaseConfigured } from "./supabase";
 import { Order, OrderItem, OrderStatus } from "./types";
 import { getProducts } from "./products";
 import { ORDER_STATUSES } from "./orderStatus";
+import { getSiteSettings } from "./siteContent";
 
 interface OrderRow {
   id: string;
@@ -107,7 +108,9 @@ export async function createOrder(input: NewOrderInput): Promise<Order> {
   }
 
   const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const currency = catalog.get(items[0].productId)?.currency || "XOF";
+  const currency =
+    catalog.get(items[0].productId)?.currency ||
+    (await getSiteSettings()).currencyCode;
 
   // Retry on the (unlikely) reference collision rather than failing the sale.
   let lastError: unknown = null;

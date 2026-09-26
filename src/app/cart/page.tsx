@@ -17,12 +17,16 @@ import {
   DEFAULT_COUNTRY,
 } from "@/lib/store";
 import { useSiteSettings } from "@/lib/useSiteSettings";
+import { convertPrice, useRates } from "@/lib/money";
 
 export default function CartPage() {
   const settings = useSiteSettings();
+  const rates = useRates();
   const cart = useSyncExternalStore(subscribe, getCart, () => EMPTY_CART);
   const total = useSyncExternalStore(subscribe, getCartTotal, () => 0);
   const country = useSyncExternalStore(subscribe, getSelectedCountry, () => DEFAULT_COUNTRY);
+
+  const totalPrice = convertPrice(total, settings.currencyLabel, country, rates);
 
   const [step, setStep] = useState<"cart" | "checkout">("cart");
   const [submitting, setSubmitting] = useState(false);
@@ -86,6 +90,8 @@ export default function CartPage() {
       city: country.requiresAddress ? form.city : undefined,
       country: country.name,
       reference,
+      currencyLabel: settings.currencyLabel,
+      convertedTotal: totalPrice.converted,
     });
 
     const url = getWhatsAppUrl(message, settings.whatsapp);
@@ -144,7 +150,7 @@ export default function CartPage() {
                     <h3 className="text-sm font-medium">{item.product.name}</h3>
                     <p className="text-white/40 text-xs mt-1">Size: {item.size}</p>
                     <p className="text-white/40 text-xs">
-                      {item.product.price.toLocaleString()} FCFA
+                      {convertPrice(item.product.price, settings.currencyLabel, country, rates).base}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
@@ -182,8 +188,14 @@ export default function CartPage() {
             <div className="border-t border-white/10 pt-6 mb-8">
               <div className="flex justify-between items-center">
                 <span className="text-white/60 text-sm tracking-wider uppercase">Total</span>
-                <span className="text-xl font-medium">{total.toLocaleString()} FCFA</span>
+                <span className="text-xl font-medium">{totalPrice.base}</span>
               </div>
+              {totalPrice.converted && (
+                <p className="text-white/30 text-xs tracking-wider text-right" style={{ marginTop: "6px" }}>
+                  ≈ {totalPrice.converted} — montant indicatif, le paiement se
+                  règle sur WhatsApp
+                </p>
+              )}
             </div>
 
             <button
@@ -273,14 +285,19 @@ export default function CartPage() {
                     {item.product.name} ({item.size}) x{item.quantity}
                   </span>
                   <span>
-                    {(item.product.price * item.quantity).toLocaleString()} FCFA
+                    {convertPrice(item.product.price * item.quantity, settings.currencyLabel, country, rates).base}
                   </span>
                 </div>
               ))}
               <div className="border-t border-white/10 mt-4 pt-4 flex justify-between">
                 <span className="text-sm tracking-wider uppercase">Total</span>
-                <span className="font-medium">{total.toLocaleString()} FCFA</span>
+                <span className="font-medium">{totalPrice.base}</span>
               </div>
+              {totalPrice.converted && (
+                <p className="text-white/30 text-xs tracking-wider text-right" style={{ marginTop: "6px" }}>
+                  ≈ {totalPrice.converted}
+                </p>
+              )}
             </div>
 
             {orderError && (
