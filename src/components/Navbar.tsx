@@ -5,8 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { getCartCount, subscribe } from "@/lib/store";
 import CountrySelector from "./CountrySelector";
+import { useSiteSettings } from "@/lib/useSiteSettings";
+import { instagramUrl, snapchatUrl } from "@/lib/contact";
 
 export default function Navbar() {
+  // These links were hardcoded and ignored the site settings entirely.
+  const settings = useSiteSettings();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -173,7 +177,7 @@ export default function Navbar() {
         {/* Bottom social in menu */}
         <div className="absolute bottom-10 flex items-center gap-6">
           <a
-            href="https://instagram.com/corbus.sn"
+            href={instagramUrl(settings.instagram)}
             target="_blank"
             rel="noopener noreferrer"
             className="text-white/30 hover:text-white transition-colors"
@@ -183,7 +187,17 @@ export default function Navbar() {
             </svg>
           </a>
           <a
-            href="mailto:corbus.sn@gmail.com"
+            href={snapchatUrl(settings.snapchat)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white/30 hover:text-white transition-colors"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+              <path d="M12.017 2c2.7 0 4.87 2.13 4.99 4.83.04.86.01 1.71-.02 2.2a.6.6 0 00.36.6c.27.11.62.06 1.03-.13.2-.09.42-.13.62-.11.4.04.72.31.8.68.09.4-.11.8-.53 1.02-.27.14-.6.26-.95.38-.66.23-1.34.47-1.42.86-.05.24.07.5.21.76.02.03.7 1.72 2.43 2.01.3.05.51.32.49.63-.03.48-.72.87-2.11 1.09-.08.13-.17.5-.23.77-.05.24-.12.5-.33.5h-.03c-.16 0-.37-.04-.63-.09a4.4 4.4 0 00-.87-.1c-.28 0-.57.03-.87.08-.58.1-1.08.45-1.66.85-.82.57-1.75 1.22-3.17 1.22h-.09c-1.42 0-2.35-.65-3.17-1.22-.58-.4-1.08-.75-1.66-.85a5.2 5.2 0 00-.87-.08c-.34 0-.63.05-.87.1-.26.05-.47.09-.63.09-.27 0-.35-.29-.4-.51-.06-.27-.15-.63-.23-.76-1.39-.22-2.08-.61-2.11-1.09a.6.6 0 01.49-.63c1.73-.29 2.41-1.98 2.43-2.01.14-.26.26-.52.21-.76-.08-.39-.76-.63-1.42-.86-.35-.12-.68-.24-.95-.38-.42-.22-.62-.62-.53-1.02.08-.37.4-.64.8-.68.2-.02.42.02.62.11.41.19.76.24 1.03.13a.6.6 0 00.36-.6c-.03-.49-.06-1.34-.02-2.2C7.147 4.13 9.317 2 12.017 2z" />
+            </svg>
+          </a>
+          <a
+            href={`mailto:${settings.email}`}
             className="text-white/30 hover:text-white transition-colors"
           >
             <svg

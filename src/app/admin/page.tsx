@@ -761,6 +761,29 @@ export default function AdminPage() {
                     />
                   </div>
                   <div>
+                    <label style={s.label}>Snapchat</label>
+                    <input
+                      type="text"
+                      value={settings.snapchat}
+                      onChange={(e) => setSettings({ ...settings, snapchat: e.target.value })}
+                      placeholder="corbus.sn"
+                      style={s.input}
+                    />
+                  </div>
+                  <div>
+                    <label style={s.label}>Numéro de contact</label>
+                    <input
+                      type="text"
+                      value={settings.phone}
+                      onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
+                      placeholder="221788292047"
+                      style={s.input}
+                    />
+                    <p style={{ fontSize: 12, color: "#999", margin: "6px 0 0" }}>
+                      Format international sans le +, indicatif pays compris.
+                    </p>
+                  </div>
+                  <div>
                     <label style={s.label}>Email</label>
                     <input
                       type="text"

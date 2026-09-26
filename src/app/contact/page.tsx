@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import FooterSection from "@/components/FooterSection";
 import { useSiteSettings } from "@/lib/useSiteSettings";
+import { instagramUrl, snapchatUrl, phoneDigits, formatPhone } from "@/lib/contact";
 
 export default function ContactPage() {
   const settings = useSiteSettings();
@@ -78,7 +79,7 @@ export default function ContactPage() {
           >
             {/* Instagram Card */}
             <a
-              href={`https://instagram.com/${settings.instagram.replace('@', '')}`}
+              href={instagramUrl(settings.instagram)}
               target="_blank"
               rel="noopener noreferrer"
               className={`group relative border border-white/[0.06] rounded-sm p-10 flex flex-col items-center text-center hover:border-white/15 transition-all duration-500 ${
@@ -105,6 +106,82 @@ export default function ContactPage() {
               </span>
 
               {/* Arrow indicator */}
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+                className="w-4 h-4 text-white/10 group-hover:text-white/40 transition-all duration-500 group-hover:translate-x-1"
+                style={{ marginTop: "20px" }}
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+
+            <a
+              href={snapchatUrl(settings.snapchat)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`group relative border border-white/[0.06] rounded-sm p-10 flex flex-col items-center text-center hover:border-white/15 transition-all duration-500 ${
+                visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              }`}
+              style={{ transitionDelay: "0.8s" }}
+            >
+              <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-white/10 group-hover:border-white/25 transition-colors" />
+              <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-white/10 group-hover:border-white/25 transition-colors" />
+              <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-white/10 group-hover:border-white/25 transition-colors" />
+              <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-white/10 group-hover:border-white/25 transition-colors" />
+
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-white/30 group-hover:text-white/70 transition-colors duration-500" style={{ marginBottom: "20px" }}>
+                <path d="M12.017 2c2.7 0 4.87 2.13 4.99 4.83.04.86.01 1.71-.02 2.2a.6.6 0 00.36.6c.27.11.62.06 1.03-.13.2-.09.42-.13.62-.11.4.04.72.31.8.68.09.4-.11.8-.53 1.02-.27.14-.6.26-.95.38-.66.23-1.34.47-1.42.86-.05.24.07.5.21.76.02.03.7 1.72 2.43 2.01.3.05.51.32.49.63-.03.48-.72.87-2.11 1.09-.08.13-.17.5-.23.77-.05.24-.12.5-.33.5h-.03c-.16 0-.37-.04-.63-.09a4.4 4.4 0 00-.87-.1c-.28 0-.57.03-.87.08-.58.1-1.08.45-1.66.85-.82.57-1.75 1.22-3.17 1.22h-.09c-1.42 0-2.35-.65-3.17-1.22-.58-.4-1.08-.75-1.66-.85a5.2 5.2 0 00-.87-.08c-.34 0-.63.05-.87.1-.26.05-.47.09-.63.09-.27 0-.35-.29-.4-.51-.06-.27-.15-.63-.23-.76-1.39-.22-2.08-.61-2.11-1.09a.6.6 0 01.49-.63c1.73-.29 2.41-1.98 2.43-2.01.14-.26.26-.52.21-.76-.08-.39-.76-.63-1.42-.86-.35-.12-.68-.24-.95-.38-.42-.22-.62-.62-.53-1.02.08-.37.4-.64.8-.68.2-.02.42.02.62.11.41.19.76.24 1.03.13a.6.6 0 00.36-.6c-.03-.49-.06-1.34-.02-2.2C7.147 4.13 9.317 2 12.017 2z" />
+              </svg>
+
+              <p className="text-white/15 text-[10px] tracking-[0.4em] uppercase" style={{ marginBottom: "12px" }}>
+                Snapchat
+              </p>
+
+              <span className="text-white/50 text-base tracking-wider group-hover:text-white transition-colors duration-500">
+                {settings.snapchat}
+              </span>
+
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+                className="w-4 h-4 text-white/10 group-hover:text-white/40 transition-all duration-500 group-hover:translate-x-1"
+                style={{ marginTop: "20px" }}
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+
+            <a
+              href={`https://wa.me/${phoneDigits(settings.phone)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`group relative border border-white/[0.06] rounded-sm p-10 flex flex-col items-center text-center hover:border-white/15 transition-all duration-500 ${
+                visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              }`}
+              style={{ transitionDelay: "0.95s" }}
+            >
+              <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-white/10 group-hover:border-white/25 transition-colors" />
+              <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-white/10 group-hover:border-white/25 transition-colors" />
+              <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-white/10 group-hover:border-white/25 transition-colors" />
+              <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-white/10 group-hover:border-white/25 transition-colors" />
+
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-white/30 group-hover:text-white/70 transition-colors duration-500" style={{ marginBottom: "20px" }}>
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0122 16.92z" />
+              </svg>
+
+              <p className="text-white/15 text-[10px] tracking-[0.4em] uppercase" style={{ marginBottom: "12px" }}>
+                WhatsApp
+              </p>
+
+              <span className="text-white/50 text-base tracking-wider group-hover:text-white transition-colors duration-500">
+                {formatPhone(settings.phone)}
+              </span>
+
               <svg
                 viewBox="0 0 24 24"
                 fill="none"

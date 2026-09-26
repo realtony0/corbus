@@ -7,6 +7,9 @@ export interface SiteSettings {
   // Contact
   whatsapp: string;
   instagram: string;
+  snapchat: string;
+  /** Public contact number, international format without +, e.g. 221788292047. */
+  phone: string;
   email: string;
   tagline: string;
   // Hero
@@ -47,6 +50,8 @@ export interface SiteSettings {
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   whatsapp: "221788292047",
   instagram: "@corbus.sn",
+  snapchat: "corbus.sn",
+  phone: "221788292047",
   email: "corbus.sn@gmail.com",
   tagline: "For all the black birds",
   heroImage: "/images/gallery/photo4.jpg",
