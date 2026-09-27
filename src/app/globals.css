@@ -13,10 +13,18 @@
   --color-text: #ffffff;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/*
+ * Wrapped in @layer base on purpose. Unlayered rules beat layered ones in the
+ * cascade, so an unlayered `* { margin: 0 }` silently overrode every Tailwind
+ * `mx-auto` on the site and left all centred containers stuck against the left
+ * edge. Inside the base layer, Tailwind's utilities win as intended.
+ */
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 }
 
 html {
