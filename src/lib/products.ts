@@ -54,7 +54,11 @@ export async function getProducts(): Promise<Product[]> {
     .from("products")
     .select(COLUMNS)
     .order("sort_order", { ascending: true })
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
+    // Final tiebreaker: the seeded products share one created_at, so without
+    // it Postgres was free to return them in any order, and the catalog
+    // reshuffled every time a product was edited.
+    .order("id", { ascending: true });
   if (error) throw new Error(`getProducts: ${error.message}`);
   return (data as ProductRow[]).map(rowToProduct);
 }
