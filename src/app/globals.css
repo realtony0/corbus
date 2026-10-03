@@ -170,3 +170,20 @@ h1, h2, h3 {
   pointer-events: none;
   z-index: 5;
 }
+
+/*
+ * Size picker and "add to cart" on a product card.
+ *
+ * They were revealed on hover only, so on a touch screen the panel stayed
+ * translated below the card and clipped away: there was no way to pick a size
+ * or order at all from a phone. Where the pointer cannot hover, show it.
+ */
+@media (hover: none), (pointer: coarse) {
+  .product-actions {
+    /* Explicit zeros, not `none`: the CSS build strips `translate: none`,
+       which left Tailwind's `translate: 0 100%` in place and the panel
+       clipped below the card. Also reset the variable Tailwind reads. */
+    --tw-translate-y: 0;
+    translate: 0 0;
+  }
+}

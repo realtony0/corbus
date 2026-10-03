@@ -70,7 +70,7 @@ function ProductCard({
 
         {/* Hover overlay with quick actions */}
         {available && (
-          <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-gradient-to-t from-black/90 via-black/70 to-transparent" style={{ padding: "40px 20px 20px" }}>
+          <div className="product-actions absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-gradient-to-t from-black/90 via-black/70 to-transparent" style={{ padding: "40px 20px 20px" }}>
             <div className="flex justify-center gap-2" style={{ marginBottom: "12px" }}>
               {product.sizes.map((size) => {
                 const soldOut = sizeSoldOut(size);
