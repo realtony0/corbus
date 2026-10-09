@@ -178,8 +178,14 @@ export default function AdminPage() {
       setFormError("Le nom du produit est obligatoire.");
       return;
     }
-    const major = Number(priceInput.replace(",", "."));
-    if (!Number.isFinite(major) || major <= 0) {
+    const typed = priceInput.trim();
+    // Accept both separators and stray spaces: 60,7 / 60.7 / 1 299,50
+    const major = Number(typed.replace(/\s/g, "").replace(",", "."));
+    if (typed === "" || !Number.isFinite(major)) {
+      setFormError(`Prix illisible : « ${priceInput} ». Écris par exemple 49,99.`);
+      return;
+    }
+    if (major <= 0) {
       setFormError("Indique un prix supérieur à 0.");
       return;
     }
@@ -1277,11 +1283,12 @@ export default function AdminPage() {
                 <div>
                   <label style={s.label}>Prix ({settings.currencyLabel})</label>
                   <input
-                    type="number"
-                    step="0.01"
-                    min="0"
+                    /* Not type="number": it discards anything it cannot parse
+                       in the browser's locale, so "60,7" came back empty and
+                       the form complained the price was zero. */
+                    type="text"
                     inputMode="decimal"
-                    placeholder="49.99"
+                    placeholder="49,99"
                     value={priceInput}
                     onChange={(e) => setPriceInput(e.target.value)}
                     style={s.input}
