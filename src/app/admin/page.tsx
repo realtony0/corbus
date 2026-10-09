@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Order, OrderStatus, Product } from "@/lib/types";
 import { ORDER_STATUSES, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from "@/lib/orderStatus";
+import { prepareImage, ImagePrepError } from "@/lib/imagePrep";
 import { updateSiteSettings, DEFAULT_SITE_SETTINGS, SiteSettings } from "@/lib/siteSettings";
 
 const DEFAULT_GALLERY = [
@@ -209,8 +210,10 @@ export default function AdminPage() {
   const uploadFile = async (file: File, folder: string): Promise<string | null> => {
     setUploading(true);
     try {
+      // Phone photos arrive as HEIC and oversized; normalise before sending.
+      const prepared = await prepareImage(file);
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", prepared);
       formData.append("folder", folder);
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       if (res.status === 401) {
@@ -221,8 +224,8 @@ export default function AdminPage() {
       if (data.path) return data.path;
       alert(data.error || "Échec de l'upload");
       return null;
-    } catch {
-      alert("Échec de l'upload");
+    } catch (err) {
+      alert(err instanceof ImagePrepError ? err.message : "Échec de l'upload");
       return null;
     } finally {
       setUploading(false);
