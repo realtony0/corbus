@@ -40,6 +40,8 @@ export interface SiteSettings {
   currencyCode: string;
   /** What visitors see next to an amount, e.g. "$ CA". */
   currencyLabel: string;
+  /** Minor units per major unit, as a power of ten: 2 for cents, 0 for FCFA. */
+  currencyDecimals: number;
   // Appearance
   loadingDuration: number;
   bodyFont: string;
@@ -76,6 +78,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   footerNote: "",
   currencyCode: "CAD",
   currencyLabel: "$ CA",
+  currencyDecimals: 2,
   loadingDuration: 1400,
   bodyFont: "Inter",
   headingFont: "Cormorant Garamond",

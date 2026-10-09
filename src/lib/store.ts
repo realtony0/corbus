@@ -2,6 +2,7 @@
 
 import { CartItem, Product, Country } from "./types";
 import { countries } from "./countries";
+import { formatPrice } from "./money";
 
 /**
  * Cart + country state.
@@ -142,17 +143,27 @@ export function generateOrderMessage(customerInfo: {
   reference?: string;
   /** Shop currency label; the message used to hardcode FCFA. */
   currencyLabel: string;
+  /** Minor units per major unit, for formatting the amounts. */
+  currencyDecimals: number;
   /** Local equivalent of the total, when the buyer's currency differs. */
   convertedTotal?: string | null;
 }): string {
   const items = getCart()
     .map(
       (item) =>
-        `• ${item.product.name} (${item.size}) x${item.quantity} — ${item.product.price.toLocaleString("fr-FR")} ${customerInfo.currencyLabel}`
+        `• ${item.product.name} (${item.size}) x${item.quantity} — ${formatPrice(
+          item.product.price,
+          customerInfo.currencyLabel,
+          customerInfo.currencyDecimals
+        )}`
     )
     .join("\n");
 
-  const total = getCartTotal().toLocaleString();
+  const total = formatPrice(
+    getCartTotal(),
+    customerInfo.currencyLabel,
+    customerInfo.currencyDecimals
+  );
 
   let msg = `🛒 Nouvelle commande CORBUS\n`;
   if (customerInfo.reference) {
@@ -166,7 +177,7 @@ export function generateOrderMessage(customerInfo: {
     msg += `📍 ${customerInfo.address}, ${customerInfo.city}\n`;
   }
   msg += `\n📦 Articles:\n${items}\n\n`;
-  msg += `💰 Total: ${total} ${customerInfo.currencyLabel}`;
+  msg += `💰 Total: ${total}`;
   if (customerInfo.convertedTotal) {
     msg += `\n(≈ ${customerInfo.convertedTotal})`;
   }

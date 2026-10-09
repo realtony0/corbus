@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Order, OrderStatus, Product } from "@/lib/types";
 import { ORDER_STATUSES, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from "@/lib/orderStatus";
 import { prepareImage, ImagePrepError } from "@/lib/imagePrep";
+import { formatPrice, toMajor, toMinor } from "@/lib/money";
 import { updateSiteSettings, DEFAULT_SITE_SETTINGS, SiteSettings } from "@/lib/siteSettings";
 
 /** A blank or invalid number field yields NaN, which JSON turns into null and
@@ -44,6 +45,8 @@ export default function AdminPage() {
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [newSize, setNewSize] = useState("");
+  // Kept as text so a half-typed "49." survives; converted to minor units on save.
+  const [priceInput, setPriceInput] = useState("");
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -175,19 +178,13 @@ export default function AdminPage() {
       setFormError("Le nom du produit est obligatoire.");
       return;
     }
-    if (!Number.isFinite(form.price) || form.price <= 0) {
+    const major = Number(priceInput.replace(",", "."));
+    if (!Number.isFinite(major) || major <= 0) {
       setFormError("Indique un prix supérieur à 0.");
       return;
     }
-    // The price column is an integer; a decimal reached Postgres and came back
-    // as an opaque server error.
-    if (!Number.isInteger(form.price)) {
-      setFormError(
-        `Les prix doivent être des nombres entiers pour l'instant : ` +
-          `écris ${Math.round(form.price)} plutôt que ${form.price}.`
-      );
-      return;
-    }
+    // Stored in minor units, so 49,99 is an integer number of cents.
+    const price = toMinor(major, settings.currencyDecimals);
     // An empty slot was being stored and rendered as a broken image.
     const images = form.images.map((i) => i.trim()).filter(Boolean);
     if (images.length === 0) {
@@ -196,13 +193,14 @@ export default function AdminPage() {
     }
 
     const method = editing ? "PUT" : "POST";
-    const payload = { ...form, name, images };
+    const payload = { ...form, name, images, price };
     const body = editing ? { ...payload, id: editing.id } : payload;
     const res = await apiWrite("/api/products", method, body);
     if (!res || !res.ok) return;
     setShowForm(false);
     setEditing(null);
     setForm({ ...EMPTY_FORM });
+    setPriceInput("");
     fetchProducts();
   };
 
@@ -225,6 +223,7 @@ export default function AdminPage() {
       stock: product.stock ?? {},
       sortOrder: product.sortOrder ?? 0,
     });
+    setPriceInput(String(toMajor(product.price, settings.currencyDecimals)));
     setFormError("");
     setShowForm(true);
   };
@@ -561,7 +560,7 @@ export default function AdminPage() {
                             <span style={{ fontSize: 13, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
                           </div>
                         </td>
-                        <td style={{ padding: "12px 8px", fontSize: 13, color: "#666" }}>{p.price.toLocaleString("fr-FR")} {settings.currencyLabel}</td>
+                        <td style={{ padding: "12px 8px", fontSize: 13, color: "#666" }}>{formatPrice(p.price, settings.currencyLabel, settings.currencyDecimals)}</td>
                         <td style={{ padding: "12px 8px", fontSize: 12, color: "#888" }}>{p.category}</td>
                         <td style={{ padding: "12px 0 12px 8px", textAlign: "right" }}>
                           <span style={s.badge(p.inStock)}>{p.inStock ? "En stock" : "Épuisé"}</span>
@@ -585,6 +584,7 @@ export default function AdminPage() {
                   onClick={() => {
                     setEditing(null);
                     setForm({ ...EMPTY_FORM });
+                    setPriceInput("");
                     setShowForm(true);
                   }}
                   style={{ ...s.btn, background: "#111", color: "#fff", display: "flex", alignItems: "center", gap: 6 }}
@@ -601,7 +601,7 @@ export default function AdminPage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <h3 style={{ fontSize: 14, fontWeight: 600, margin: "0 0 4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</h3>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: "#333" }}>{p.price.toLocaleString("fr-FR")} {settings.currencyLabel}</span>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: "#333" }}>{formatPrice(p.price, settings.currencyLabel, settings.currencyDecimals)}</span>
                           <span style={{ fontSize: 12, color: "#999" }}>{p.category}</span>
                           <span style={s.badge(p.inStock)}>{p.inStock ? "En stock" : "Épuisé"}</span>
                         </div>
@@ -744,11 +744,11 @@ export default function AdminPage() {
                         {o.items.map((it, i) => (
                           <p key={i} style={{ fontSize: 13, color: "#444", margin: "0 0 4px" }}>
                             {it.quantity} × {it.name}
-                            {it.size ? ` (${it.size})` : ""} — {(it.price * it.quantity).toLocaleString()} {o.currency}
+                            {it.size ? ` (${it.size})` : ""} — {formatPrice(it.price * it.quantity, o.currency, settings.currencyDecimals)}
                           </p>
                         ))}
                         <p style={{ fontSize: 14, fontWeight: 600, margin: "8px 0 0" }}>
-                          Total : {o.total.toLocaleString()} {o.currency}
+                          Total : {formatPrice(o.total, o.currency, settings.currencyDecimals)}
                         </p>
                       </div>
 
@@ -1276,7 +1276,16 @@ export default function AdminPage() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
                   <label style={s.label}>Prix ({settings.currencyLabel})</label>
-                  <input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: safeNumber(e.target.value) })} style={s.input} />
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    inputMode="decimal"
+                    placeholder="49.99"
+                    value={priceInput}
+                    onChange={(e) => setPriceInput(e.target.value)}
+                    style={s.input}
+                  />
                 </div>
                 <div>
                   <label style={s.label}>Catégorie</label>

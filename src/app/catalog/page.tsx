@@ -14,16 +14,18 @@ function ProductCard({
   product,
   delay,
   currencyLabel,
+  currencyDecimals,
   country,
   rates,
 }: {
   product: Product;
   delay: number;
   currencyLabel: string;
+  currencyDecimals: number;
   country: Country;
   rates: RateTable | null;
 }) {
-  const price = convertPrice(product.price, currencyLabel, country, rates);
+  const price = convertPrice(product.price, currencyLabel, country, rates, currencyDecimals);
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [added, setAdded] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -213,6 +215,7 @@ export default function CatalogPage() {
                 product={product}
                 delay={i * 150}
                 currencyLabel={settings.currencyLabel}
+                currencyDecimals={settings.currencyDecimals}
                 country={country}
                 rates={rates}
               />

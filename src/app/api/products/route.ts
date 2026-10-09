@@ -51,6 +51,14 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    // Prices are integers in the currency's minor unit; the column rejects a
+    // fractional value with an error that means nothing to the caller.
+    if (!Number.isInteger(body.price) || body.price < 0) {
+      return NextResponse.json(
+        { error: "price doit être un entier en centimes" },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(await addProduct(body), { status: 201 });
   } catch (error) {
     return failed(error, true);
@@ -63,6 +71,15 @@ export async function PUT(request: NextRequest) {
     const { id, ...updates } = await request.json();
     if (!id) {
       return NextResponse.json({ error: "id est requis" }, { status: 400 });
+    }
+    if (
+      updates.price !== undefined &&
+      (!Number.isInteger(updates.price) || updates.price < 0)
+    ) {
+      return NextResponse.json(
+        { error: "price doit être un entier en centimes" },
+        { status: 400 }
+      );
     }
     const product = await updateProduct(id, updates);
     if (!product) {

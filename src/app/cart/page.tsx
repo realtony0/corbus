@@ -26,7 +26,7 @@ export default function CartPage() {
   const total = useSyncExternalStore(subscribe, getCartTotal, () => 0);
   const country = useSyncExternalStore(subscribe, getSelectedCountry, () => DEFAULT_COUNTRY);
 
-  const totalPrice = convertPrice(total, settings.currencyLabel, country, rates);
+  const totalPrice = convertPrice(total, settings.currencyLabel, country, rates, settings.currencyDecimals);
 
   const [step, setStep] = useState<"cart" | "checkout">("cart");
   const [submitting, setSubmitting] = useState(false);
@@ -91,6 +91,7 @@ export default function CartPage() {
       country: country.name,
       reference,
       currencyLabel: settings.currencyLabel,
+      currencyDecimals: settings.currencyDecimals,
       convertedTotal: totalPrice.converted,
     });
 
@@ -150,7 +151,7 @@ export default function CartPage() {
                     <h3 className="text-sm font-medium">{item.product.name}</h3>
                     <p className="text-white/40 text-xs mt-1">Size: {item.size}</p>
                     <p className="text-white/40 text-xs">
-                      {convertPrice(item.product.price, settings.currencyLabel, country, rates).base}
+                      {convertPrice(item.product.price, settings.currencyLabel, country, rates, settings.currencyDecimals).base}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
@@ -285,7 +286,7 @@ export default function CartPage() {
                     {item.product.name} ({item.size}) x{item.quantity}
                   </span>
                   <span>
-                    {convertPrice(item.product.price * item.quantity, settings.currencyLabel, country, rates).base}
+                    {convertPrice(item.product.price * item.quantity, settings.currencyLabel, country, rates, settings.currencyDecimals).base}
                   </span>
                 </div>
               ))}
