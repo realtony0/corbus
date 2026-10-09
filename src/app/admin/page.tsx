@@ -6,6 +6,13 @@ import { ORDER_STATUSES, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from "@/lib/
 import { prepareImage, ImagePrepError } from "@/lib/imagePrep";
 import { updateSiteSettings, DEFAULT_SITE_SETTINGS, SiteSettings } from "@/lib/siteSettings";
 
+/** A blank or invalid number field yields NaN, which JSON turns into null and
+ *  the NOT NULL columns reject with an opaque 500. Keep it a real number. */
+function safeNumber(value: string): number {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
 const DEFAULT_GALLERY = [
   "/images/gallery/hero.jpg",
   "/images/gallery/photo1.jpg",
@@ -170,6 +177,15 @@ export default function AdminPage() {
     }
     if (!Number.isFinite(form.price) || form.price <= 0) {
       setFormError("Indique un prix supérieur à 0.");
+      return;
+    }
+    // The price column is an integer; a decimal reached Postgres and came back
+    // as an opaque server error.
+    if (!Number.isInteger(form.price)) {
+      setFormError(
+        `Les prix doivent être des nombres entiers pour l'instant : ` +
+          `écris ${Math.round(form.price)} plutôt que ${form.price}.`
+      );
       return;
     }
     // An empty slot was being stored and rendered as a broken image.
@@ -1080,7 +1096,7 @@ export default function AdminPage() {
                     <input
                       type="number"
                       value={settings.loadingDuration}
-                      onChange={(e) => setSettings({ ...settings, loadingDuration: Number(e.target.value) })}
+                      onChange={(e) => setSettings({ ...settings, loadingDuration: safeNumber(e.target.value) })}
                       style={s.input}
                     />
                   </div>
@@ -1260,7 +1276,7 @@ export default function AdminPage() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
                   <label style={s.label}>Prix ({settings.currencyLabel})</label>
-                  <input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} style={s.input} />
+                  <input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: safeNumber(e.target.value) })} style={s.input} />
                 </div>
                 <div>
                   <label style={s.label}>Catégorie</label>
@@ -1288,7 +1304,7 @@ export default function AdminPage() {
                         onChange={(e) => {
                           const stock = { ...form.stock };
                           if (e.target.value === "") delete stock[sz];
-                          else stock[sz] = Math.max(0, Number(e.target.value));
+                          else stock[sz] = Math.max(0, safeNumber(e.target.value));
                           setForm({ ...form, stock });
                         }}
                         style={{ ...s.input, width: 120, padding: "6px 10px" }}
@@ -1349,7 +1365,7 @@ export default function AdminPage() {
                 <input
                   type="number"
                   value={form.sortOrder}
-                  onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })}
+                  onChange={(e) => setForm({ ...form, sortOrder: safeNumber(e.target.value) })}
                   style={{ ...s.input, width: 140 }}
                 />
                 <p style={{ fontSize: 12, color: "#999", margin: "6px 0 0" }}>

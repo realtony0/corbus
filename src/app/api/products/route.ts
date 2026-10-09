@@ -19,9 +19,18 @@ function unauthorized() {
   return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 }
 
-function failed(error: unknown) {
+/**
+ * Admin routes get the real reason. "Erreur serveur" told the shop owner
+ * nothing and left no way to act; these endpoints are behind the session
+ * cookie, so the detail does not reach the public.
+ */
+function failed(error: unknown, detailed = false) {
   console.error("products route:", error);
-  return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  const detail = error instanceof Error ? error.message : String(error);
+  return NextResponse.json(
+    { error: detailed ? `Erreur serveur : ${detail}` : "Erreur serveur" },
+    { status: 500 }
+  );
 }
 
 export async function GET() {
@@ -44,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json(await addProduct(body), { status: 201 });
   } catch (error) {
-    return failed(error);
+    return failed(error, true);
   }
 }
 
@@ -61,7 +70,7 @@ export async function PUT(request: NextRequest) {
     }
     return NextResponse.json(product);
   } catch (error) {
-    return failed(error);
+    return failed(error, true);
   }
 }
 
@@ -77,6 +86,6 @@ export async function DELETE(request: NextRequest) {
     }
     return NextResponse.json({ success: true });
   } catch (error) {
-    return failed(error);
+    return failed(error, true);
   }
 }

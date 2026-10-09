@@ -17,12 +17,21 @@ function unauthorized() {
   return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 }
 
-function failed(error: unknown) {
+/**
+ * Admin routes get the real reason. "Erreur serveur" told the shop owner
+ * nothing and left no way to act; these endpoints are behind the session
+ * cookie, so the detail does not reach the public.
+ */
+function failed(error: unknown, detailed = false) {
   if (error instanceof OrderError) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
   console.error("orders route:", error);
-  return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  const detail = error instanceof Error ? error.message : String(error);
+  return NextResponse.json(
+    { error: detailed ? `Erreur serveur : ${detail}` : "Erreur serveur" },
+    { status: 500 }
+  );
 }
 
 /** Admin only — the order list holds customer contact details. */

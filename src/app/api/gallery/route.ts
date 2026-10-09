@@ -25,7 +25,12 @@ export async function PUT(request: NextRequest) {
     }
     return NextResponse.json(await saveGallery(body), { headers: NO_CACHE });
   } catch (error) {
+    // Behind the admin cookie: give the real reason, not a dead end.
     console.error("gallery route:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    const detail = error instanceof Error ? error.message : String(error);
+    return NextResponse.json(
+      { error: `Erreur serveur : ${detail}` },
+      { status: 500 }
+    );
   }
 }
