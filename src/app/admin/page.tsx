@@ -26,6 +26,7 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersError, setOrdersError] = useState("");
+  const [formError, setFormError] = useState("");
   const [gallery, setGallery] = useState<string[]>(DEFAULT_GALLERY);
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [showForm, setShowForm] = useState(false);
@@ -68,9 +69,19 @@ export default function AdminPage() {
         headers: body === undefined ? undefined : { "Content-Type": "application/json" },
         body: body === undefined ? undefined : JSON.stringify(body),
       }).catch(() => null);
-      if (res && res.status === 401) {
+      if (!res) {
+        // A refused save used to return silently: the dialog stayed open and
+        // the click looked like it did nothing at all.
+        setFormError("Connexion impossible. Vérifie ta connexion internet.");
+        return null;
+      }
+      if (res.status === 401) {
         setAuthenticated(false);
         return null;
+      }
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setFormError(body.error || `Échec de l'enregistrement (${res.status}).`);
       }
       return res;
     },
@@ -150,8 +161,27 @@ export default function AdminPage() {
   };
 
   const handleSave = async () => {
+    setFormError("");
+
+    const name = form.name.trim();
+    if (!name) {
+      setFormError("Le nom du produit est obligatoire.");
+      return;
+    }
+    if (!Number.isFinite(form.price) || form.price <= 0) {
+      setFormError("Indique un prix supérieur à 0.");
+      return;
+    }
+    // An empty slot was being stored and rendered as a broken image.
+    const images = form.images.map((i) => i.trim()).filter(Boolean);
+    if (images.length === 0) {
+      setFormError("Ajoute au moins une image.");
+      return;
+    }
+
     const method = editing ? "PUT" : "POST";
-    const body = editing ? { ...form, id: editing.id } : form;
+    const payload = { ...form, name, images };
+    const body = editing ? { ...payload, id: editing.id } : payload;
     const res = await apiWrite("/api/products", method, body);
     if (!res || !res.ok) return;
     setShowForm(false);
@@ -179,6 +209,7 @@ export default function AdminPage() {
       stock: product.stock ?? {},
       sortOrder: product.sortOrder ?? 0,
     });
+    setFormError("");
     setShowForm(true);
   };
 
@@ -233,6 +264,7 @@ export default function AdminPage() {
   };
 
   const saveSettings = async () => {
+    setFormError("");
     const res = await apiWrite("/api/settings", "PUT", settings);
     if (!res || !res.ok) return;
     // Reflect the change in this tab straight away; other visitors get it
@@ -804,6 +836,18 @@ export default function AdminPage() {
                       style={s.input}
                     />
                   </div>
+                  {formError && (
+                    <p
+                      role="alert"
+                      style={{
+                        fontSize: 13, color: "#dc2626", background: "#fef2f2",
+                        border: "1px solid #fecaca", borderRadius: 8,
+                        padding: "10px 12px", margin: 0,
+                      }}
+                    >
+                      {formError}
+                    </p>
+                  )}
                   <button onClick={saveSettings} style={{ ...s.btn, background: "#111", color: "#fff", alignSelf: "flex-start" }}>
                     {settingsSaved ? "✓ Enregistré" : "Enregistrer"}
                   </button>
@@ -1135,6 +1179,18 @@ export default function AdminPage() {
                     </select>
                   </div>
 
+                  {formError && (
+                    <p
+                      role="alert"
+                      style={{
+                        fontSize: 13, color: "#dc2626", background: "#fef2f2",
+                        border: "1px solid #fecaca", borderRadius: 8,
+                        padding: "10px 12px", margin: 0,
+                      }}
+                    >
+                      {formError}
+                    </p>
+                  )}
                   <button onClick={saveSettings} style={{ ...s.btn, background: "#111", color: "#fff", alignSelf: "flex-start" }}>
                     {settingsSaved ? "✓ Enregistré" : "Enregistrer"}
                   </button>
@@ -1189,7 +1245,7 @@ export default function AdminPage() {
           <div style={{ background: "#fff", borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "85vh", overflow: "auto", padding: 32 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
               <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>{editing ? "Modifier le produit" : "Nouveau produit"}</h2>
-              <button onClick={() => { setShowForm(false); setEditing(null); }} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#999" }}>✕</button>
+              <button onClick={() => { setShowForm(false); setEditing(null); setFormError(""); }} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#999" }}>✕</button>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -1411,8 +1467,21 @@ export default function AdminPage() {
                 <span style={{ fontSize: 14, color: "#444" }}>{form.inStock ? "En stock" : "Épuisé"}</span>
               </div>
 
+              {formError && (
+                <p
+                  role="alert"
+                  style={{
+                    fontSize: 13, color: "#dc2626", background: "#fef2f2",
+                    border: "1px solid #fecaca", borderRadius: 8,
+                    padding: "10px 12px", margin: 0,
+                  }}
+                >
+                  {formError}
+                </p>
+              )}
+
               <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-                <button onClick={() => { setShowForm(false); setEditing(null); }} style={{ ...s.btn, flex: 1, background: "#f5f5f5", color: "#333" }}>Annuler</button>
+                <button onClick={() => { setShowForm(false); setEditing(null); setFormError(""); }} style={{ ...s.btn, flex: 1, background: "#f5f5f5", color: "#333" }}>Annuler</button>
                 <button onClick={handleSave} style={{ ...s.btn, flex: 1, background: "#111", color: "#fff" }}>Enregistrer</button>
               </div>
             </div>
